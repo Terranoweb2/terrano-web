@@ -1,0 +1,131 @@
+.toolbar {
+  position: absolute;
+  top: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--color-surface, #1e293b);
+  border: 1px solid var(--color-border, #334155);
+  border-radius: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  z-index: 10000;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.sep {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border, #334155);
+  margin: 0 4px;
+}
+
+.modeBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.modeBtn:hover {
+  background: var(--color-hover, rgba(255, 255, 255, 0.08));
+  color: var(--color-text, #e2e8f0);
+}
+.modeBtn.active {
+  background: var(--emerald, #10b981);
+  color: #fff;
+}
+.modeBtn.videoMode.active {
+  background: #ef4444;
+}
+
+.timerIcon {
+  color: var(--color-text-muted, #94a3b8);
+  margin-right: 2px;
+}
+
+.timerBtn {
+  padding: 4px 8px;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  font-size: 11px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.timerBtn:hover {
+  background: var(--color-hover, rgba(255, 255, 255, 0.08));
+}
+.timerBtn.active {
+  background: var(--emerald, #10b981);
+  color: #fff;
+}
+
+.captureBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background: var(--emerald, #10b981);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.captureBtn:hover {
+  background: var(--emerald-dark, #059669);
+}
+
+.recordBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 14px;
+  border: none;
+  border-radius: 6px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.recordBtn:hover {
+  background: #dc2626;
+}
+
+.cancelBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.cancelBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}

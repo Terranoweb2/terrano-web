@@ -1,0 +1,60 @@
+{
+  "name": "terrano-web",
+  "version": "1.0.3",
+  "description": "TerranoWeb — A modern, fast and secure desktop web browser",
+  "main": "./out/main/index.js",
+  "author": "Terrano",
+  "license": "MIT",
+  "scripts": {
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "preview": "electron-vite preview",
+    "package": "electron-vite build && electron-builder --win --config",
+    "typecheck:node": "tsc --noEmit -p tsconfig.node.json",
+    "typecheck:web": "tsc --noEmit -p tsconfig.web.json",
+    "typecheck": "npm run typecheck:node && npm run typecheck:web",
+    "lint": "eslint . --ext .ts,.tsx",
+    "test": "vitest run",
+    "postinstall": "electron-rebuild -f -w better-sqlite3"
+  },
+  "dependencies": {
+    "better-sqlite3": "^12.6.2",
+    "electron-updater": "^6.8.3",
+    "lucide-react": "^0.500.0",
+    "mailparser": "^3.9.3",
+    "nodemailer": "^8.0.1",
+    "sharp": "^0.34.5",
+    "smtp-server": "^3.18.1",
+    "zustand": "^5.0.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "better-sqlite3",
+      "electron",
+      "esbuild",
+      "electron-winstaller",
+      "sharp"
+    ]
+  },
+  "devDependencies": {
+    "@electron-toolkit/preload": "^3.0.2",
+    "@electron-toolkit/tsconfig": "^1.0.1",
+    "@electron/rebuild": "^4.0.3",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/mailparser": "^3.4.6",
+    "@types/nodemailer": "^7.0.11",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/smtp-server": "^3.5.12",
+    "@vitejs/plugin-react": "^4.5.0",
+    "electron": "^40.6.1",
+    "electron-builder": "^26.0.0",
+    "electron-vite": "^5.0.0",
+    "rcedit": "^5.0.2",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "to-ico": "^1.1.5",
+    "typescript": "^5.8.0",
+    "vitest": "^3.0.0"
+  }
+}

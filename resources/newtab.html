@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self';" />
+  <title>Nouvel onglet — TerranoWeb</title>
+  <link rel="icon" type="image/png" href="favicon.png" />
+  <style>
+    :root {
+      --emerald: #10b981;
+      --emerald-hover: #059669;
+      --emerald-light: #d1fae5;
+      --bg: #ffffff;
+      --bg-secondary: #f8fafc;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --border: #e2e8f0;
+      --surface-hover: #f1f5f9;
+      --radius: 24px;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --emerald: #34d399;
+        --emerald-hover: #10b981;
+        --emerald-light: #064e3b;
+        --bg: #0f172a;
+        --bg-secondary: #1e293b;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --border: #334155;
+        --surface-hover: #334155;
+      }
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      user-select: none;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 36px;
+    }
+
+    .logo img {
+      height: 64px;
+      width: auto;
+    }
+
+    .search-form {
+      width: 100%;
+      max-width: 560px;
+      position: relative;
+      margin-bottom: 48px;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 48px;
+      padding: 0 48px 0 20px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--bg-secondary);
+      color: var(--text);
+      font-size: 15px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+    }
+
+    .search-input:focus {
+      border-color: var(--emerald);
+      background: var(--bg);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .search-btn {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 36px;
+      height: 36px;
+      border: none;
+      border-radius: 50%;
+      background: var(--emerald);
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s;
+    }
+
+    .search-btn:hover {
+      background: var(--emerald-hover);
+    }
+
+    .search-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .shortcuts {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
+      gap: 16px;
+      max-width: 560px;
+      width: 100%;
+    }
+
+    .shortcut {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 8px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: var(--text);
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .shortcut:hover {
+      background: var(--surface-hover);
+    }
+
+    .shortcut-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      overflow: hidden;
+    }
+
+    .shortcut-icon img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+    }
+
+    .shortcut-label {
+      font-size: 12px;
+      color: var(--text-secondary);
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 80px;
+    }
+
+    .clock-date {
+      position: absolute;
+      top: 32px;
+      right: 32px;
+      text-align: right;
+    }
+
+    .clock {
+      font-size: 14px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .date {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 20px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+  </style>
+</head>
+<body>
+  <div class="clock-date">
+    <div class="clock" id="clock"></div>
+    <div class="date" id="date"></div>
+  </div>
+
+  <div class="logo">
+    <img src="logo.png" alt="TerranoWeb">
+  </div>
+
+  <form class="search-form" id="searchForm">
+    <input
+      class="search-input"
+      id="searchInput"
+      type="text"
+      placeholder="Rechercher sur le Web ou saisir une URL..."
+      autocomplete="off"
+      autofocus
+    />
+    <button type="submit" class="search-btn" aria-label="Rechercher">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="11" cy="11" r="8" />
+        <line x1="21" y1="21" x2="16.65" y2="16.65" />
+      </svg>
+    </button>
+  </form>
+
+  <div class="shortcuts" id="shortcuts">
+    <a class="shortcut" href="https://www.google.com">
+      <div class="shortcut-icon">G</div>
+      <div class="shortcut-label">Google</div>
+    </a>
+    <a class="shortcut" href="https://fr.wikipedia.org">
+      <div class="shortcut-icon">W</div>
+      <div class="shortcut-label">Wikipedia</div>
+    </a>
+    <a class="shortcut" href="https://www.youtube.com">
+      <div class="shortcut-icon">Y</div>
+      <div class="shortcut-label">YouTube</div>
+    </a>
+    <a class="shortcut" href="https://github.com">
+      <div class="shortcut-icon">GH</div>
+      <div class="shortcut-label">GitHub</div>
+    </a>
+  </div>
+
+  <div class="footer" style="display:flex;align-items:center;gap:6px"><img src="logo.png" alt="" style="height:14px;width:auto;opacity:.5"> Naviguez librement</div>
+
+  <script>
+    var searchEngine = 'https://terranoweb.win/search?q=';
+
+    // Clock & date
+    function updateClock() {
+      var now = new Date();
+      var h = String(now.getHours()).padStart(2, '0');
+      var m = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('clock').textContent = h + ':' + m;
+
+      var days = ['Dimanche', 'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+      var months = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin',
+                    'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre'];
+      document.getElementById('date').textContent =
+        days[now.getDay()] + ' ' + now.getDate() + ' ' + months[now.getMonth()];
+    }
+    updateClock();
+    setInterval(updateClock, 30000);
+
+    // Load dynamic data from preload API
+    document.addEventListener('DOMContentLoaded', function() {
+      if (typeof window.terranoNewTab === 'undefined') return;
+
+      // Load search engine config
+      window.terranoNewTab.getConfig().then(function(config) {
+        if (config && config.searchEngine) {
+          searchEngine = config.searchEngine;
+        }
+      });
+
+      // Load top sites
+      window.terranoNewTab.getTopSites().then(function(sites) {
+        if (!sites || sites.length === 0) return;
+
+        var container = document.getElementById('shortcuts');
+        container.innerHTML = '';
+
+        sites.forEach(function(site) {
+          var a = document.createElement('a');
+          a.className = 'shortcut';
+          a.href = site.url;
+
+          var icon = document.createElement('div');
+          icon.className = 'shortcut-icon';
+
+          if (site.faviconUrl) {
+            var img = document.createElement('img');
+            img.src = site.faviconUrl;
+            img.width = 20;
+            img.height = 20;
+            img.onerror = function() {
+              icon.removeChild(img);
+              icon.textContent = getInitial(site.url);
+            };
+            icon.appendChild(img);
+          } else {
+            icon.textContent = getInitial(site.url);
+          }
+
+          var label = document.createElement('div');
+          label.className = 'shortcut-label';
+          label.textContent = site.title || getHostname(site.url);
+
+          a.appendChild(icon);
+          a.appendChild(label);
+          container.appendChild(a);
+        });
+      });
+    });
+
+    function getHostname(url) {
+      try { return new URL(url).hostname; } catch(e) { return url; }
+    }
+
+    function getInitial(url) {
+      try { return new URL(url).hostname.replace('www.', '').charAt(0).toUpperCase(); }
+      catch(e) { return '?'; }
+    }
+
+    // Search form
+    document.getElementById('searchForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      var q = document.getElementById('searchInput').value.trim();
+      if (!q) return;
+      if (/^(https?:\/\/|[a-z0-9-]+\.[a-z]{2,})/i.test(q)) {
+        if (!/^https?:\/\//i.test(q)) q = 'https://' + q;
+        window.location.href = q;
+      } else {
+        window.location.href = searchEngine + encodeURIComponent(q);
+      }
+    });
+  </script>
+</body>
+</html>

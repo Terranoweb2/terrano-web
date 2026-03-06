@@ -1,0 +1,40 @@
+.titlebar {
+  display: flex;
+  align-items: center;
+  height: var(--titlebar-height);
+  background: #0f172a;
+  border-bottom: none;
+  position: relative;
+  z-index: 100;
+}
+
+.dragRegion {
+  flex: 1;
+  height: 100%;
+  -webkit-app-region: drag;
+}
+
+.controls {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.controlBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: var(--titlebar-height);
+  color: #94a3b8;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.controlBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+}
+
+.closeBtn:hover {
+  background: var(--color-danger);
+  color: #fff;
+}

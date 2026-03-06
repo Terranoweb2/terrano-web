@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recherche — TerranoWeb</title>
+  <link rel="icon" type="image/png" href="/favicon.png?v=2">
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    :root {
+      --emerald:#10b981; --emerald-dark:#059669;
+      --emerald-glow:rgba(16,185,129,0.15);
+      --bg:#0f172a; --bg-card:#1e293b; --text:#f1f5f9;
+      --text-muted:#94a3b8; --border:#334155; --danger:#ef4444;
+    }
+    body { font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background:var(--bg); color:var(--text); line-height:1.6; min-height:100vh; }
+
+    /* NAV */
+    nav { display:flex; align-items:center; justify-content:space-between; padding:0 32px; height:56px; background:rgba(15,23,42,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); position:fixed; top:0; left:0; right:0; z-index:100; }
+    .nav-left { display:flex; align-items:center; gap:24px; }
+    .nav-logo { display:flex; align-items:center; text-decoration:none; }
+    .nav-logo img { height:32px; width:auto; }
+    .nav-link { color:var(--text-muted); text-decoration:none; font-size:13px; transition:color .2s; }
+    .nav-link:hover { color:var(--text); }
+
+    /* SEARCH BAR */
+    .search-top { max-width:720px; margin:0 auto; padding:72px 20px 0; }
+    .sb { display:flex; align-items:center; width:100%; background:var(--bg-card); border:2px solid var(--border); border-radius:9999px; padding:0 20px; height:48px; gap:12px; transition:border-color .2s,box-shadow .2s; }
+    .sb:focus-within { border-color:var(--emerald); box-shadow:0 0 0 3px var(--emerald-glow); }
+    .sb svg { flex-shrink:0; color:var(--text-muted); }
+    .sb input { flex:1; height:100%; background:transparent; border:none; outline:none; color:var(--text); font-size:15px; }
+    .sb input::placeholder { color:var(--text-muted); }
+    .sb button { padding:8px 18px; background:var(--emerald); color:#fff; border:none; border-radius:9999px; font-size:13px; font-weight:500; cursor:pointer; flex-shrink:0; transition:background .2s; }
+    .sb button:hover { background:var(--emerald-dark); }
+
+    /* MODE TABS */
+    .mode-tabs { max-width:720px; margin:0 auto; padding:12px 20px 0; display:flex; gap:4px; }
+    .mode-tab { display:inline-flex; align-items:center; gap:5px; padding:7px 16px; background:none; border:1px solid var(--border); border-radius:9999px; color:var(--text-muted); font-size:12px; font-weight:500; cursor:pointer; transition:all .2s; text-decoration:none; }
+    .mode-tab:hover { border-color:var(--emerald); color:var(--text); }
+    .mode-tab.active { background:var(--emerald); color:#fff; border-color:var(--emerald); }
+    .mode-tab svg { flex-shrink:0; width:14px; height:14px; }
+
+    /* WEB RESULTS */
+    .sr-wrap { max-width:720px; margin:0 auto; padding:16px 20px 60px; }
+    .sr-meta { font-size:13px; color:var(--text-muted); margin:12px 0 20px; display:flex; align-items:center; gap:8px; }
+    .sr-meta .sr-count { font-weight:600; color:var(--text); }
+    .sr-item { padding:18px 0; border-bottom:1px solid rgba(51,65,85,0.5); }
+    .sr-item:first-child { padding-top:0; }
+    .sr-url-row { display:flex; align-items:center; gap:8px; margin-bottom:5px; }
+    .sr-url-row img { width:18px; height:18px; border-radius:3px; flex-shrink:0; background:var(--border); }
+    .sr-domain { font-size:12px; color:var(--text-muted); }
+    .sr-full-url { font-size:11px; color:var(--border); margin-left:4px; max-width:400px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+    .sr-title { font-size:18px; font-weight:600; color:var(--emerald); text-decoration:none; line-height:1.35; display:block; }
+    .sr-title:hover { text-decoration:underline; }
+    .sr-desc { font-size:14px; color:var(--text-muted); line-height:1.55; margin-top:5px; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; }
+
+    /* IMAGE RESULTS */
+    .img-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(180px,1fr)); gap:10px; }
+    .img-card { position:relative; border-radius:10px; overflow:hidden; background:var(--bg-card); border:1px solid var(--border); cursor:pointer; transition:border-color .2s,transform .15s; }
+    .img-card:hover { border-color:var(--emerald); transform:translateY(-2px); }
+    .img-card img { width:100%; height:140px; object-fit:cover; display:block; background:var(--border); }
+    .img-card-info { padding:8px 10px; }
+    .img-card-title { font-size:11px; color:var(--text); line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .img-card-src { font-size:10px; color:var(--text-muted); margin-top:3px; }
+
+    /* IMAGE LIGHTBOX */
+    .lightbox { display:none; position:fixed; inset:0; z-index:200; background:rgba(0,0,0,.9); align-items:center; justify-content:center; flex-direction:column; padding:20px; }
+    .lightbox.open { display:flex; }
+    .lightbox img { max-width:90vw; max-height:75vh; object-fit:contain; border-radius:8px; }
+    .lightbox-close { position:absolute; top:16px; right:20px; background:none; border:none; color:#fff; font-size:32px; cursor:pointer; z-index:201; }
+    .lightbox-info { text-align:center; margin-top:14px; max-width:600px; }
+    .lightbox-title { font-size:15px; font-weight:600; color:#fff; }
+    .lightbox-src { font-size:12px; color:var(--text-muted); margin-top:4px; }
+    .lightbox-link { display:inline-block; margin-top:8px; padding:6px 16px; background:var(--emerald); color:#fff; border-radius:6px; text-decoration:none; font-size:12px; }
+
+    /* VIDEO RESULTS */
+    .vid-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px; }
+    .vid-card { display:flex; flex-direction:column; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; overflow:hidden; text-decoration:none; color:var(--text); transition:border-color .2s,transform .15s; }
+    .vid-card:hover { border-color:var(--emerald); transform:translateY(-2px); }
+    .vid-thumb { position:relative; }
+    .vid-thumb img { width:100%; height:160px; object-fit:cover; display:block; background:var(--border); }
+    .vid-play { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); width:48px; height:48px; background:rgba(0,0,0,.65); border-radius:50%; display:flex; align-items:center; justify-content:center; }
+    .vid-card:hover .vid-play { background:rgba(16,185,129,.85); }
+    .vid-play svg { margin-left:3px; }
+    .vid-dur { position:absolute; bottom:6px; right:6px; background:rgba(0,0,0,.8); color:#fff; font-size:10px; padding:2px 8px; border-radius:4px; }
+    .vid-body { padding:12px 14px; display:flex; flex-direction:column; gap:4px; flex:1; }
+    .vid-title { font-size:14px; font-weight:600; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .vid-desc { font-size:12px; color:var(--text-muted); line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .vid-meta { font-size:11px; color:var(--text-muted); margin-top:auto; padding-top:6px; display:flex; align-items:center; gap:8px; }
+    .vid-src { color:var(--emerald); font-weight:600; text-transform:uppercase; font-size:10px; }
+
+    /* IA RESULTS */
+    .ia-wrap { max-width:720px; margin:0 auto; padding:16px 20px 60px; }
+    .ia-answer { background:var(--bg-card); border:1px solid var(--emerald); border-radius:14px; padding:20px 24px; margin-bottom:20px; }
+    .ia-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .ia-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; background:rgba(16,185,129,0.15); color:var(--emerald); border-radius:6px; font-size:12px; font-weight:600; }
+    .ia-badge svg { width:16px; height:16px; }
+    .ia-summary { font-size:15px; line-height:1.7; color:var(--text); }
+    .ia-summary strong { color:var(--emerald); }
+    .ia-summary ul { margin:10px 0; padding-left:20px; }
+    .ia-summary li { margin-bottom:6px; }
+    .ia-sources { margin-top:16px; padding-top:14px; border-top:1px solid var(--border); }
+    .ia-sources-title { font-size:12px; font-weight:600; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; margin-bottom:10px; }
+    .ia-source { display:flex; align-items:center; gap:8px; padding:8px 0; border-bottom:1px solid rgba(51,65,85,0.3); text-decoration:none; color:var(--text); transition:color .2s; }
+    .ia-source:hover { color:var(--emerald); }
+    .ia-source img { width:16px; height:16px; border-radius:3px; flex-shrink:0; }
+    .ia-source-domain { font-size:11px; color:var(--text-muted); }
+    .ia-source-t { font-size:13px; font-weight:500; }
+    .ia-typing { display:inline-block; }
+    .ia-cursor { display:inline-block; width:2px; height:16px; background:var(--emerald); margin-left:2px; animation:blink 1s infinite; vertical-align:text-bottom; }
+    @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0} }
+
+    /* KNOWLEDGE PANEL */
+    .kp { background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:20px 24px; margin-bottom:20px; }
+    .kp-header { display:flex; gap:16px; align-items:flex-start; }
+    .kp-img { width:120px; height:120px; object-fit:cover; border-radius:10px; flex-shrink:0; background:var(--border); }
+    .kp-info { flex:1; min-width:0; }
+    .kp-title { font-size:22px; font-weight:700; color:var(--text); margin-bottom:2px; }
+    .kp-subtitle { font-size:13px; color:var(--emerald); margin-bottom:8px; font-style:italic; }
+    .kp-desc { font-size:14px; color:var(--text-muted); line-height:1.6; display:-webkit-box; -webkit-line-clamp:4; -webkit-box-orient:vertical; overflow:hidden; }
+    .kp-facts { display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--border); }
+    .kp-fact { display:flex; flex-direction:column; gap:2px; }
+    .kp-fact-label { font-size:11px; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; font-weight:600; }
+    .kp-fact-value { font-size:14px; color:var(--text); }
+    .kp-links { display:flex; gap:8px; margin-top:12px; flex-wrap:wrap; }
+    .kp-link { display:inline-flex; align-items:center; gap:5px; padding:5px 12px; background:rgba(16,185,129,0.1); color:var(--emerald); border-radius:6px; text-decoration:none; font-size:12px; font-weight:500; transition:background .2s; }
+    .kp-link:hover { background:rgba(16,185,129,0.2); }
+    .kp-type-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 10px; border-radius:4px; font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px; }
+    .kp-type-person { background:rgba(99,102,241,0.15); color:#818cf8; }
+    .kp-type-place { background:rgba(34,197,94,0.15); color:#22c55e; }
+    .kp-type-company { background:rgba(234,179,8,0.15); color:#eab308; }
+    .kp-type-concept { background:rgba(168,85,247,0.15); color:#a855f7; }
+    @media(max-width:768px) {
+      .kp { padding:16px 18px; }
+      .kp-header { flex-direction:column; align-items:center; text-align:center; }
+      .kp-img { width:100px; height:100px; }
+      .kp-facts { grid-template-columns:1fr 1fr; }
+    }
+    @media(max-width:420px) {
+      .kp-facts { grid-template-columns:1fr; }
+      .kp-img { width:80px; height:80px; }
+    }
+
+    /* STATES */
+    .sr-empty { text-align:center; padding:80px 20px; color:var(--text-muted); }
+    .sr-empty svg { margin-bottom:16px; opacity:.4; }
+    .sr-empty p { font-size:15px; }
+    .sr-empty .sr-sub { font-size:13px; margin-top:6px; }
+
+    .sr-loading { display:flex; flex-direction:column; gap:20px; padding-top:8px; }
+    .sk-item { display:flex; flex-direction:column; gap:8px; padding:16px 0; border-bottom:1px solid rgba(51,65,85,0.3); }
+    .sk-line { height:14px; border-radius:4px; background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.5s infinite; }
+    .sk-line.s { width:30%; } .sk-line.m { width:60%; } .sk-line.l { width:90%; } .sk-line.xl { width:100%; }
+    .sk-line.title { height:20px; width:75%; }
+    @keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+    .sr-provider { text-align:center; font-size:11px; color:var(--text-muted); margin-top:28px; padding:14px 0; border-top:1px solid var(--border); }
+    .sr-provider a { color:var(--emerald); text-decoration:none; }
+    .sr-provider a:hover { text-decoration:underline; }
+
+    /* FOOTER */
+    footer { border-top:1px solid var(--border); padding:24px 20px; text-align:center; color:var(--text-muted); font-size:12px; }
+    footer a { color:var(--text-muted); text-decoration:none; transition:color .2s; }
+    footer a:hover { color:var(--emerald); }
+
+    @media(max-width:768px) {
+      body { overflow-x:hidden; }
+      nav { padding:0 12px; }
+      .nav-link { display:none; }
+      .nav-logo img { height:28px; }
+      .search-top { padding:64px 12px 0; }
+      .sr-wrap { padding:14px 12px 40px; }
+      .ia-wrap { padding:14px 12px 40px; }
+      .sb { height:44px; padding:0 12px; gap:8px; }
+      .sb input { font-size:14px; }
+      .sb button { padding:7px 14px; font-size:12px; }
+      .mode-tabs { padding:10px 12px 0; gap:3px; overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+      .mode-tabs::-webkit-scrollbar { display:none; }
+      .mode-tab { padding:6px 12px; font-size:11px; white-space:nowrap; }
+      .sr-title { font-size:16px; }
+      .sr-desc { font-size:13px; }
+      .sr-full-url { display:none; }
+      .sr-item { padding:14px 0; }
+      .img-grid { grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:8px; }
+      .img-card img { height:110px; }
+      .vid-grid { grid-template-columns:1fr; }
+      .vid-thumb img { height:180px; }
+      .ia-answer { padding:16px 18px; }
+      .ia-summary { font-size:14px; }
+      footer { padding:18px 12px; }
+    }
+    @media(max-width:420px) {
+      nav { height:48px; }
+      .search-top { padding:56px 10px 0; }
+      .sr-wrap, .ia-wrap { padding:12px 10px 30px; }
+      .sb { height:40px; padding:0 10px; }
+      .sb input { font-size:13px; }
+      .sb button { padding:6px 12px; font-size:11px; }
+      .mode-tabs { padding:8px 10px 0; }
+      .mode-tab { padding:5px 10px; font-size:10px; }
+      .sr-title { font-size:15px; }
+      .sr-desc { font-size:12px; }
+      .sr-meta { font-size:12px; }
+      .img-grid { grid-template-columns:repeat(2,1fr); gap:6px; }
+      .img-card img { height:90px; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="nav-left">
+      <a href="/" class="nav-logo"><img src="/logo.png?v=2" alt="TerranoWeb"></a>
+      <a href="/#news" class="nav-link">Actualites</a>
+      <a href="/mail" class="nav-link" id="navMail" style="display:none;position:relative">Messagerie <span id="mailBadge" style="display:none;position:absolute;top:-6px;right:-12px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center">0</span></a>
+    </div>
+  </nav>
+
+  <div class="search-top">
+    <form class="sb" onsubmit="doSearch(event)">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" id="si" placeholder="Rechercher sur le web..." autocomplete="off">
+      <button type="submit">Rechercher</button>
+    </form>
+  </div>
+
+  <!-- MODE TABS -->
+  <div class="mode-tabs" id="mode-tabs">
+    <a class="mode-tab" data-mode="web" onclick="switchMode('web');return false" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Web</a>
+    <a class="mode-tab" data-mode="images" onclick="switchMode('images');return false" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> Images</a>
+    <a class="mode-tab" data-mode="videos" onclick="switchMode('videos');return false" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Vid&eacute;os</a>
+    <a class="mode-tab" data-mode="ia" onclick="switchMode('ia');return false" href="#">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> IA</a>
+  </div>
+
+  <div class="sr-wrap" id="sr-wrap">
+    <div class="sr-meta" id="sr-meta" style="display:none">
+      <span class="sr-count" id="sr-count"></span>
+      <span id="sr-query-label"></span>
+    </div>
+    <div id="sr"></div>
+    <div class="sr-provider" id="sr-prov" style="display:none"></div>
+  </div>
+
+  <!-- IA results container (hidden by default) -->
+  <div class="ia-wrap" id="ia-wrap" style="display:none">
+    <div id="ia-content"></div>
+  </div>
+
+  <!-- Image lightbox -->
+  <div class="lightbox" id="lightbox" onclick="closeLB(event)">
+    <button class="lightbox-close" onclick="closeLB()">&times;</button>
+    <img id="lb-img" src="" alt="">
+    <div class="lightbox-info">
+      <div class="lightbox-title" id="lb-title"></div>
+      <div class="lightbox-src" id="lb-src"></div>
+      <a class="lightbox-link" id="lb-link" href="" target="_blank" rel="noopener">Voir la page source</a>
+    </div>
+  </div>
+
+  <footer>
+    <p style="display:flex;align-items:center;justify-content:center;gap:8px">
+      <img src="/logo.png?v=2" alt="" style="height:18px;width:auto;opacity:.6">
+      &copy; 2026 TerranoWeb. Tous droits reserves.
+    </p>
+  </footer>
+
+  <script>
+  function E(s){return s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+
+  // Read params
+  const params=new URLSearchParams(window.location.search);
+  const query=params.get('q')||'';
+  let mode=params.get('mode')||'web';
+  document.getElementById('si').value=query;
+  if(query)document.title='Recherche: '+query+' — TerranoWeb';
+
+  // Highlight active tab
+  document.querySelectorAll('.mode-tab').forEach(t=>{
+    if(t.dataset.mode===mode)t.classList.add('active');
+  });
+
+  // Switch mode
+  function switchMode(m){
+    mode=m;
+    const url=new URL(window.location);
+    if(m==='web')url.searchParams.delete('mode');
+    else url.searchParams.set('mode',m);
+    window.history.replaceState(null,'',url);
+    document.querySelectorAll('.mode-tab').forEach(t=>{
+      t.classList.toggle('active',t.dataset.mode===m);
+    });
+    if(query)loadResults();
+  }
+
+  // Search form
+  function doSearch(ev){
+    ev.preventDefault();
+    const q=document.getElementById('si').value.trim();
+    if(!q)return;
+    // Always search — never redirect to external URLs (prevents open redirect)
+    const u='/search?q='+encodeURIComponent(q)+(mode!=='web'?'&mode='+mode:'');
+    window.location.href=u;
+  }
+
+  // Show loading skeleton
+  function showLoading(){
+    document.getElementById('sr-wrap').style.display='block';
+    document.getElementById('ia-wrap').style.display='none';
+    document.getElementById('sr-meta').style.display='none';
+    document.getElementById('sr-prov').style.display='none';
+    if(mode==='images'){
+      document.getElementById('sr').innerHTML='<div class="img-grid">'+Array(12).fill('<div class="img-card"><div style="height:140px;background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%);background-size:200% 100%;animation:sh 1.5s infinite"></div><div class="img-card-info"><div class="sk-line m"></div></div></div>').join('')+'</div>';
+    }else if(mode==='videos'){
+      document.getElementById('sr').innerHTML='<div class="vid-grid">'+Array(6).fill('<div class="vid-card"><div style="height:160px;background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%);background-size:200% 100%;animation:sh 1.5s infinite"></div><div class="vid-body"><div class="sk-line title"></div><div class="sk-line m"></div></div></div>').join('')+'</div>';
+    }else{
+      document.getElementById('sr').innerHTML='<div class="sr-loading">'+Array(6).fill('<div class="sk-item"><div class="sk-line s"></div><div class="sk-line title"></div><div class="sk-line xl"></div><div class="sk-line m"></div></div>').join('')+'</div>';
+    }
+  }
+
+  function showEmpty(msg,sub){
+    document.getElementById('sr-wrap').style.display='block';
+    document.getElementById('ia-wrap').style.display='none';
+    document.getElementById('sr').innerHTML='<div class="sr-empty"><svg width="56" height="56" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><p>'+E(msg)+'</p>'+(sub?'<p class="sr-sub">'+E(sub)+'</p>':'')+'</div>';
+  }
+
+  // ===== RENDER WEB RESULTS =====
+  function renderWeb(results,q,provider){
+    const sr=document.getElementById('sr');
+    const meta=document.getElementById('sr-meta');
+    const prov=document.getElementById('sr-prov');
+    meta.style.display='flex';
+    document.getElementById('sr-count').textContent=results.length+' résultats';
+    document.getElementById('sr-query-label').textContent='pour « '+q+' »';
+    sr.innerHTML=results.map(r=>{
+      let dp='';try{dp=new URL(r.url).pathname.substring(0,60)}catch{}
+      return '<div class="sr-item"><div class="sr-url-row"><img src="'+E(r.favicon)+'" alt="" onerror="this.src=\'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 16 16%22><rect fill=%22%23334155%22 width=%2216%22 height=%2216%22 rx=%223%22/></svg>\'"><span class="sr-domain">'+E(r.source)+'</span><span class="sr-full-url">'+E(dp)+'</span></div><a class="sr-title" href="'+E(r.url)+'" target="_blank" rel="noopener">'+E(r.title)+'</a>'+(r.description?'<p class="sr-desc">'+E(r.description)+'</p>':'')+'</div>'
+    }).join('');
+    prov.style.display='none';
+  }
+
+  // ===== RENDER IMAGES =====
+  function renderImages(results,q){
+    const sr=document.getElementById('sr');
+    const meta=document.getElementById('sr-meta');
+    meta.style.display='flex';
+    document.getElementById('sr-count').textContent=results.length+' images';
+    document.getElementById('sr-query-label').textContent='pour « '+q+' »';
+    sr.innerHTML='<div class="img-grid">'+results.map((r,i)=>
+      '<div class="img-card" onclick="openLB('+i+')"><img src="'+E(r.thumbnail)+'" alt="'+E(r.title)+'" loading="lazy" onerror="this.parentElement.style.display=\'none\'"><div class="img-card-info"><div class="img-card-title">'+E(r.title)+'</div><div class="img-card-src">'+E(r.source)+'</div></div></div>'
+    ).join('')+'</div>';
+    window._imgResults=results;
+  }
+
+  // ===== RENDER VIDEOS =====
+  function renderVideos(results,q){
+    const sr=document.getElementById('sr');
+    const meta=document.getElementById('sr-meta');
+    meta.style.display='flex';
+    document.getElementById('sr-count').textContent=results.length+' vidéos';
+    document.getElementById('sr-query-label').textContent='pour « '+q+' »';
+    sr.innerHTML='<div class="vid-grid">'+results.map(r=>
+      '<a class="vid-card" href="'+E(r.url)+'" target="_blank" rel="noopener"><div class="vid-thumb"><img src="'+E(r.thumbnail)+'" alt="'+E(r.title)+'" loading="lazy" onerror="this.style.background=\'var(--border)\'"><div class="vid-play"><svg width="22" height="22" fill="#fff" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>'+(r.duration?'<span class="vid-dur">'+E(r.duration)+'</span>':'')+'</div><div class="vid-body"><div class="vid-title">'+E(r.title)+'</div>'+(r.description?'<div class="vid-desc">'+E(r.description)+'</div>':'')+'<div class="vid-meta"><span class="vid-src">'+E(r.source)+'</span>'+(r.age?'<span>'+E(r.age)+'</span>':'')+'</div></div></a>'
+    ).join('')+'</div>';
+  }
+
+  // ===== RENDER KNOWLEDGE PANEL =====
+  function renderKnowledgePanel(panel){
+    if(!panel||!panel.title)return;
+    const typeLabels={person:'Personne',place:'Lieu',company:'Entreprise',concept:'Sujet'};
+    const typeClass=panel.type?'kp-type-'+panel.type:'';
+    let html='<div class="kp">';
+    if(panel.type&&typeLabels[panel.type]){
+      html+='<span class="kp-type-badge '+typeClass+'">'+E(typeLabels[panel.type])+'</span>';
+    }
+    html+='<div class="kp-header">';
+    if(panel.image){
+      html+='<img class="kp-img" src="'+E(panel.image)+'" alt="'+E(panel.title)+'" onerror="this.style.display=\'none\'">';
+    }
+    html+='<div class="kp-info">';
+    html+='<div class="kp-title">'+E(panel.title)+'</div>';
+    if(panel.subtitle) html+='<div class="kp-subtitle">'+E(panel.subtitle)+'</div>';
+    if(panel.description) html+='<p class="kp-desc">'+E(panel.description)+'</p>';
+    html+='</div></div>';
+    if(panel.facts&&panel.facts.length>0){
+      html+='<div class="kp-facts">';
+      panel.facts.forEach(f=>{
+        html+='<div class="kp-fact"><span class="kp-fact-label">'+E(f.label)+'</span><span class="kp-fact-value">'+E(f.value)+'</span></div>';
+      });
+      html+='</div>';
+    }
+    if(panel.links&&panel.links.length>0){
+      html+='<div class="kp-links">';
+      panel.links.forEach(l=>{
+        html+='<a class="kp-link" href="'+E(l.url)+'" target="_blank" rel="noopener">'+E(l.label)+' &#8599;</a>';
+      });
+      html+='</div>';
+    }
+    html+='</div>';
+    const sr=document.getElementById('sr');
+    sr.insertAdjacentHTML('beforebegin',html);
+  }
+
+  // ===== RENDER IA =====
+  function renderIA(smartData,q){
+    document.getElementById('sr-wrap').style.display='none';
+    const wrap=document.getElementById('ia-wrap');
+    wrap.style.display='block';
+    const content=document.getElementById('ia-content');
+    let html='';
+
+    // Knowledge Panel
+    if(smartData.knowledgePanel){
+      const panel=smartData.knowledgePanel;
+      const typeLabels={person:'Personne',place:'Lieu',company:'Entreprise',concept:'Sujet'};
+      const typeClass=panel.type?'kp-type-'+panel.type:'';
+      html+='<div class="kp" style="margin-bottom:20px">';
+      if(panel.type&&typeLabels[panel.type]) html+='<span class="kp-type-badge '+typeClass+'">'+E(typeLabels[panel.type])+'</span>';
+      html+='<div class="kp-header">';
+      if(panel.image) html+='<img class="kp-img" src="'+E(panel.image)+'" alt="'+E(panel.title)+'" onerror="this.style.display=\'none\'">';
+      html+='<div class="kp-info"><div class="kp-title">'+E(panel.title)+'</div>';
+      if(panel.subtitle) html+='<div class="kp-subtitle">'+E(panel.subtitle)+'</div>';
+      if(panel.description) html+='<p class="kp-desc">'+E(panel.description)+'</p>';
+      html+='</div></div>';
+      if(panel.facts&&panel.facts.length>0){
+        html+='<div class="kp-facts">';
+        panel.facts.forEach(f=>{ html+='<div class="kp-fact"><span class="kp-fact-label">'+E(f.label)+'</span><span class="kp-fact-value">'+E(f.value)+'</span></div>'; });
+        html+='</div>';
+      }
+      if(panel.links&&panel.links.length>0){
+        html+='<div class="kp-links">';
+        panel.links.forEach(l=>{ html+='<a class="kp-link" href="'+E(l.url)+'" target="_blank" rel="noopener">'+E(l.label)+' &#8599;</a>'; });
+        html+='</div>';
+      }
+      html+='</div>';
+    }
+
+    // IA Answer
+    html+='<div class="ia-answer"><div class="ia-header"><span class="ia-badge"><svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg> TerranoWeb IA</span></div><div class="ia-summary" id="ia-summary"></div></div>';
+
+    // Sources
+    const sources=smartData.webResults?smartData.webResults.slice(0,8):[];
+    if(sources.length>0){
+      html+='<div class="ia-sources"><div class="ia-sources-title">Sources</div>';
+      sources.forEach(r=>{
+        html+='<a class="ia-source" href="'+E(r.url)+'" target="_blank" rel="noopener"><img src="'+E(r.favicon)+'" alt="" onerror="this.style.display=\'none\'"><div><div class="ia-source-t">'+E(r.title)+'</div><div class="ia-source-domain">'+E(r.source)+'</div></div></a>';
+      });
+      html+='</div>';
+    }
+
+    content.innerHTML=html;
+    const summaryText=smartData.summary||'<strong>Résumé IA</strong> pour « '+E(q)+' » : Aucune information structurée trouvée.';
+    typeWriter(document.getElementById('ia-summary'),summaryText,0);
+  }
+
+  function typeWriter(el,html,i){
+    if(i<=html.length){
+      el.innerHTML=html.substring(0,i)+'<span class="ia-cursor"></span>';
+      const speed=html.charAt(i)==='<'? 0 : (html.charAt(i)===' '? 8 : 12);
+      // Skip HTML tags instantly
+      if(html.charAt(i)==='<'){
+        const closeIdx=html.indexOf('>',i);
+        if(closeIdx>-1){setTimeout(()=>typeWriter(el,html,closeIdx+1),0);return}
+      }
+      setTimeout(()=>typeWriter(el,html,i+1),speed);
+    }else{
+      el.innerHTML=html; // Remove cursor
+    }
+  }
+
+  // ===== LIGHTBOX =====
+  function openLB(i){
+    const r=window._imgResults[i];if(!r)return;
+    document.getElementById('lb-img').src=r.url||r.thumbnail;
+    document.getElementById('lb-title').textContent=r.title;
+    document.getElementById('lb-src').textContent=r.source;
+    document.getElementById('lb-link').href=r.pageUrl||r.url;
+    document.getElementById('lightbox').classList.add('open');
+    document.body.style.overflow='hidden';
+  }
+  function closeLB(ev){
+    if(ev&&ev.target!==document.getElementById('lightbox')&&ev.target!==document.querySelector('.lightbox-close'))return;
+    document.getElementById('lightbox').classList.remove('open');
+    document.body.style.overflow='';
+  }
+  document.addEventListener('keydown',e=>{if(e.key==='Escape')closeLB()});
+
+  // ===== LOAD RESULTS =====
+  async function loadResults(){
+    if(!query){showEmpty('Entrez une requête pour rechercher.','Tapez dans la barre ci-dessus et appuyez sur Entrée.');return}
+    showLoading();
+    try{
+      if(mode==='images'){
+        const resp=await fetch('/api/search/images?q='+encodeURIComponent(query));
+        const data=await resp.json();
+        if(data.ok&&data.results&&data.results.length>0){renderImages(data.results,data.query)}
+        else{showEmpty('Aucune image pour « '+E(query)+' »','Essayez avec d\'autres mots-clés.')}
+      }else if(mode==='videos'){
+        const resp=await fetch('/api/search/videos?q='+encodeURIComponent(query));
+        const data=await resp.json();
+        if(data.ok&&data.results&&data.results.length>0){renderVideos(data.results,data.query)}
+        else{showEmpty('Aucune vidéo pour « '+E(query)+' »','Essayez avec d\'autres mots-clés.')}
+      }else if(mode==='ia'){
+        const resp=await fetch('/api/search/smart?q='+encodeURIComponent(query));
+        const data=await resp.json();
+        if(data.ok){renderIA(data,data.query)}
+        else{showEmpty('Aucun résultat IA pour « '+E(query)+' »','Essayez avec d\'autres mots-clés.')}
+      }else{
+        const [searchResp,smartResp]=await Promise.all([
+          fetch('/api/search?q='+encodeURIComponent(query)),
+          fetch('/api/search/smart?q='+encodeURIComponent(query)).catch(()=>null)
+        ]);
+        const data=await searchResp.json();
+        let smartData=null;
+        try{if(smartResp)smartData=await smartResp.json()}catch{}
+        if(data.ok&&data.results&&data.results.length>0){
+          if(smartData&&smartData.ok&&smartData.knowledgePanel){
+            renderKnowledgePanel(smartData.knowledgePanel);
+          }
+          renderWeb(data.results,data.query,data.provider);
+        }else{showEmpty('Aucun résultat pour « '+E(query)+' »','Essayez avec d\'autres mots-clés.')}
+      }
+    }catch(err){
+      console.error('Search error:',err);
+      showEmpty('Erreur lors de la recherche.','Veuillez réessayer dans quelques instants.');
+    }
+  }
+
+  loadResults();
+
+  // MAIL BADGE
+  (async function(){
+    try{
+      const r=await fetch('/api/auth/me',{credentials:'same-origin'});
+      const d=await r.json();
+      if(d.ok&&d.user){
+        document.getElementById('navMail').style.display='inline-block';
+        async function pollMail(){
+          try{const m=await(await fetch('/api/mail/unread',{credentials:'same-origin'})).json();
+          if(m.ok){const b=document.getElementById('mailBadge');if(m.count>0){b.textContent=m.count>99?'99+':m.count;b.style.display='inline-block'}else{b.style.display='none'}}}catch{}
+        }
+        pollMail();setInterval(pollMail,60000);
+      }
+    }catch{}
+  })();
+  </script>
+</body>
+</html>

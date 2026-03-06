@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Creer un compte — TerranoWeb</title>
+<link rel="icon" href="/logo.png">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #06080f;
+    --bg2: #0c1220;
+    --bg3: #141c2e;
+    --bg4: #1e293b;
+    --emerald: #10b981;
+    --emerald-d: #059669;
+    --emerald-l: #34d399;
+    --emerald-glow: rgba(16,185,129,.08);
+    --emerald-glow2: rgba(16,185,129,.15);
+    --text: #f1f5f9;
+    --text2: #94a3b8;
+    --text3: #64748b;
+    --text4: #475569;
+    --border: rgba(148,163,184,.08);
+    --border2: rgba(148,163,184,.15);
+    --radius: 14px;
+    --radius-sm: 10px;
+    --radius-xs: 8px;
+    --red: #ef4444;
+    --transition: cubic-bezier(.4,0,.2,1);
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family: 'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* Background glow */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -40%; left: -20%;
+    width: 80vw; height: 80vw;
+    background: radial-gradient(circle, rgba(16,185,129,.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -30%; right: -10%;
+    width: 60vw; height: 60vw;
+    background: radial-gradient(circle, rgba(13,148,136,.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* Card */
+  .reg-card {
+    width: 100%;
+    max-width: 480px;
+    background: var(--bg2);
+    border: 1px solid var(--border2);
+    border-radius: 20px;
+    padding: 40px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.6);
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Logo */
+  .reg-logo {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  .reg-logo img { height: 36px; }
+  .reg-logo span { font-size: 18px; font-weight: 700; letter-spacing: -.3px; }
+
+  /* Step title */
+  .step-title {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    letter-spacing: -.3px;
+  }
+  .step-sub {
+    font-size: 13px;
+    color: var(--text2);
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  /* Steps viewport */
+  .steps-viewport {
+    overflow: hidden;
+    position: relative;
+  }
+  .steps-track {
+    display: flex;
+    transition: transform .4s var(--transition);
+  }
+  .step {
+    min-width: 100%;
+    flex-shrink: 0;
+  }
+
+  /* Step indicators */
+  .step-dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin: 24px 0 20px;
+  }
+  .step-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--text4);
+    transition: all .3s var(--transition);
+  }
+  .step-dot.active {
+    background: var(--emerald);
+    width: 28px;
+    border-radius: 5px;
+  }
+  .step-dot.done {
+    background: var(--emerald-d);
+  }
+
+  /* Fields */
+  .reg-row {
+    display: flex;
+    gap: 12px;
+  }
+  .reg-row > .reg-field { flex: 1; }
+
+  .reg-field {
+    margin-bottom: 16px;
+  }
+  .reg-field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--text2);
+    margin-bottom: 6px;
+    letter-spacing: .3px;
+    text-transform: uppercase;
+  }
+  .reg-field input,
+  .reg-field select {
+    width: 100%;
+    height: 46px;
+    padding: 0 16px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .reg-field input::placeholder { color: var(--text4); }
+  .reg-field input:focus,
+  .reg-field select:focus {
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 3px var(--emerald-glow);
+  }
+  .reg-field.error input,
+  .reg-field.error select {
+    border-color: var(--red);
+    box-shadow: 0 0 0 3px rgba(239,68,68,.1);
+  }
+
+  /* Select styling */
+  .reg-field select {
+    appearance: none;
+    -webkit-appearance: none;
+    cursor: pointer;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%2394a3b8' viewBox='0 0 24 24'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    padding-right: 36px;
+  }
+  .reg-field select option {
+    background: var(--bg3);
+    color: var(--text);
+  }
+
+  /* Three column (date) */
+  .three-col { gap: 10px; }
+
+  /* Email options (radio buttons style Google) */
+  .email-options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .email-option {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: all .2s;
+  }
+  .email-option:hover {
+    border-color: var(--emerald);
+    background: var(--emerald-glow);
+  }
+  .email-option.selected {
+    border-color: var(--emerald);
+    background: var(--emerald-glow);
+  }
+  .email-option input[type="radio"] {
+    appearance: none;
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--text4);
+    border-radius: 50%;
+    position: relative;
+    flex-shrink: 0;
+    transition: all .2s;
+    cursor: pointer;
+  }
+  .email-option input[type="radio"]:checked {
+    border-color: var(--emerald);
+  }
+  .email-option input[type="radio"]:checked::after {
+    content: '';
+    position: absolute;
+    inset: 3px;
+    background: var(--emerald);
+    border-radius: 50%;
+  }
+  .email-addr {
+    font-size: 14px;
+    color: var(--text);
+    font-weight: 500;
+  }
+
+  /* Custom email input */
+  .custom-email-wrap {
+    margin-top: 12px;
+    overflow: hidden;
+    transition: max-height .3s var(--transition), opacity .3s;
+    max-height: 0;
+    opacity: 0;
+  }
+  .custom-email-wrap.show {
+    max-height: 120px;
+    opacity: 1;
+  }
+  .email-input-group {
+    display: flex;
+    align-items: center;
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+    transition: border-color .25s, box-shadow .25s;
+  }
+  .email-input-group:focus-within {
+    border-color: var(--emerald);
+    box-shadow: 0 0 0 3px var(--emerald-glow);
+  }
+  .email-input-group input {
+    flex: 1;
+    height: 46px;
+    padding: 0 16px;
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+  }
+  .email-input-group input::placeholder { color: var(--text4); }
+  .email-domain {
+    padding: 0 16px;
+    color: var(--text3);
+    font-size: 13px;
+    white-space: nowrap;
+    border-left: 1px solid var(--border);
+    background: var(--bg);
+    height: 46px;
+    display: flex;
+    align-items: center;
+  }
+  .email-avail {
+    font-size: 12px;
+    margin-top: 6px;
+    min-height: 16px;
+  }
+  .email-avail.ok { color: var(--emerald); }
+  .email-avail.taken { color: var(--red); }
+
+  /* Loading for email suggestions */
+  .email-loading {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .email-loading-bar {
+    height: 52px;
+    border-radius: var(--radius-sm);
+    background: linear-gradient(90deg, var(--bg3) 25%, var(--bg4) 50%, var(--bg3) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  @keyframes shimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
+  /* Password toggle */
+  .pass-wrap {
+    position: relative;
+  }
+  .pass-wrap input { padding-right: 48px; }
+  .pass-toggle {
+    position: absolute;
+    right: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 36px;
+    height: 36px;
+    background: none;
+    border: none;
+    color: var(--text3);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    transition: color .2s, background .2s;
+  }
+  .pass-toggle:hover { background: var(--emerald-glow); color: var(--text); }
+  .pass-toggle svg { width: 18px; height: 18px; }
+
+  /* Error */
+  .reg-error {
+    font-size: 13px;
+    color: var(--red);
+    text-align: center;
+    padding: 10px 16px;
+    background: rgba(239,68,68,.08);
+    border: 1px solid rgba(239,68,68,.15);
+    border-radius: var(--radius-xs);
+    margin-bottom: 16px;
+    display: none;
+    animation: shakeError .4s;
+  }
+  @keyframes shakeError {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+
+  /* Navigation */
+  .reg-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .reg-btn-back {
+    padding: 12px 20px;
+    background: transparent;
+    color: var(--text2);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .reg-btn-back:hover { border-color: var(--emerald); color: var(--text); }
+  .reg-btn-back svg { width: 16px; height: 16px; }
+
+  .reg-btn-next {
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--emerald), #0d9488);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .25s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 4px 16px rgba(16,185,129,.2);
+  }
+  .reg-btn-next:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(16,185,129,.35);
+  }
+  .reg-btn-next:active { transform: translateY(0); }
+  .reg-btn-next:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+  .reg-btn-next svg { width: 16px; height: 16px; }
+
+  /* Footer */
+  .reg-footer {
+    text-align: center;
+    margin-top: 20px;
+    font-size: 13px;
+    color: var(--text3);
+  }
+  .reg-footer a {
+    color: var(--emerald);
+    text-decoration: none;
+    font-weight: 500;
+  }
+  .reg-footer a:hover { text-decoration: underline; }
+
+  /* Success overlay */
+  .reg-success {
+    display: none;
+    text-align: center;
+    padding: 20px 0;
+  }
+  .reg-success .check-circle {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--emerald), #0d9488);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    animation: popIn .4s var(--transition);
+  }
+  .reg-success .check-circle svg { width: 32px; height: 32px; color: #fff; }
+  @keyframes popIn {
+    0% { transform: scale(0); }
+    70% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+  }
+  .reg-success h2 { font-size: 20px; margin-bottom: 8px; }
+  .reg-success p { font-size: 14px; color: var(--text2); margin-bottom: 4px; }
+  .reg-success .email-created {
+    font-size: 16px;
+    color: var(--emerald);
+    font-weight: 600;
+    margin: 12px 0 24px;
+  }
+  .reg-success .go-btn {
+    padding: 12px 32px;
+    background: linear-gradient(135deg, var(--emerald), #0d9488);
+    color: #fff;
+    border: none;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all .25s;
+  }
+  .reg-success .go-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(16,185,129,.35); }
+
+  /* Responsive */
+  @media (max-width: 520px) {
+    .reg-card { padding: 28px 20px; border-radius: 16px; }
+    .reg-row { flex-direction: column; gap: 0; }
+    .three-col { flex-direction: row !important; gap: 8px !important; }
+    .step-title { font-size: 19px; }
+    .reg-btn-next { padding: 12px 22px; font-size: 13px; }
+  }
+  @media (max-width: 380px) {
+    .reg-card { padding: 24px 16px; }
+    .email-domain { font-size: 11px; padding: 0 10px; }
+    .three-col { flex-direction: column !important; }
+  }
+</style>
+</head>
+<body>
+
+<div class="reg-card">
+  <!-- Logo -->
+  <div class="reg-logo">
+    <img src="/logo.png" alt="TerranoWeb">
+    <span>TerranoWeb</span>
+  </div>
+
+  <!-- Error -->
+  <div class="reg-error" id="regError"></div>
+
+  <!-- Steps -->
+  <div class="steps-viewport" id="stepsViewport">
+    <div class="steps-track" id="stepsTrack">
+
+      <!-- Step 1: Name -->
+      <div class="step" id="step1">
+        <h2 class="step-title">Creer votre compte</h2>
+        <p class="step-sub">Saisissez votre prenom et votre nom de famille</p>
+        <div class="reg-row">
+          <div class="reg-field">
+            <label>Prenom</label>
+            <input type="text" id="firstName" placeholder="Jean Georges" autocomplete="given-name">
+          </div>
+          <div class="reg-field">
+            <label>Nom</label>
+            <input type="text" id="lastName" placeholder="TOH" autocomplete="family-name">
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Birth & Gender -->
+      <div class="step" id="step2">
+        <h2 class="step-title">Informations generales</h2>
+        <p class="step-sub">Saisissez votre date de naissance et votre genre</p>
+        <div class="reg-row three-col">
+          <div class="reg-field">
+            <label>Jour</label>
+            <select id="birthDay"><option value="">Jour</option></select>
+          </div>
+          <div class="reg-field">
+            <label>Mois</label>
+            <select id="birthMonth"><option value="">Mois</option></select>
+          </div>
+          <div class="reg-field">
+            <label>Annee</label>
+            <select id="birthYear"><option value="">Annee</option></select>
+          </div>
+        </div>
+        <div class="reg-field">
+          <label>Genre</label>
+          <select id="gender">
+            <option value="">Selectionnez</option>
+            <option value="homme">Homme</option>
+            <option value="femme">Femme</option>
+            <option value="autre">Autre</option>
+            <option value="non-specifie">Prefere ne pas dire</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Step 3: Email choice -->
+      <div class="step" id="step3">
+        <h2 class="step-title">Choisissez votre adresse</h2>
+        <p class="step-sub">Vous pouvez aussi creer une adresse personnalisee</p>
+        <div id="emailLoading" class="email-loading" style="display:none">
+          <div class="email-loading-bar"></div>
+          <div class="email-loading-bar"></div>
+          <div class="email-loading-bar"></div>
+        </div>
+        <div class="email-options" id="emailOptions" style="display:none"></div>
+        <div class="custom-email-wrap" id="customEmailWrap">
+          <div class="reg-field" style="margin-bottom:0">
+            <label>Votre adresse</label>
+            <div class="email-input-group">
+              <input type="text" id="customEmail" placeholder="votre.adresse" oninput="checkCustomEmail()">
+              <span class="email-domain">@terranoweb.win</span>
+            </div>
+            <div class="email-avail" id="emailAvail"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Password -->
+      <div class="step" id="step4">
+        <h2 class="step-title">Creez votre mot de passe</h2>
+        <p class="step-sub">Utilisez au moins 8 caracteres avec des lettres et des chiffres</p>
+        <div class="reg-field">
+          <label>Mot de passe</label>
+          <div class="pass-wrap">
+            <input type="password" id="regPass" placeholder="Mot de passe" autocomplete="new-password">
+            <button type="button" class="pass-toggle" onclick="toggleVis('regPass',this)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="reg-field">
+          <label>Confirmer le mot de passe</label>
+          <div class="pass-wrap">
+            <input type="password" id="regPassConfirm" placeholder="Confirmer" autocomplete="new-password">
+            <button type="button" class="pass-toggle" onclick="toggleVis('regPassConfirm',this)">
+              <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Step dots -->
+  <div class="step-dots" id="stepDots">
+    <div class="step-dot active"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+    <div class="step-dot"></div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="reg-nav" id="regNav">
+    <button class="reg-btn-back" id="btnBack" onclick="prevStep()" style="visibility:hidden">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+      Retour
+    </button>
+    <button class="reg-btn-next" id="btnNext" onclick="nextStep()">
+      Suivant
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+    </button>
+  </div>
+
+  <!-- Success screen (hidden) -->
+  <div class="reg-success" id="regSuccess">
+    <div class="check-circle">
+      <svg fill="none" stroke="currentColor" stroke-width="3" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+    </div>
+    <h2>Compte cree !</h2>
+    <p>Votre adresse email est</p>
+    <div class="email-created" id="createdEmail"></div>
+    <button class="go-btn" onclick="window.location.href='/'">Acceder a TerranoWeb</button>
+  </div>
+
+  <!-- Footer -->
+  <div class="reg-footer">
+    Deja un compte ? <a href="/">Se connecter</a>
+  </div>
+</div>
+
+<script>
+  let currentStep = 0
+  const totalSteps = 4
+  let emailSuggestions = []
+  let customEmailAvailable = false
+  let checkEmailTimeout = null
+
+  const formData = {
+    firstName: '', lastName: '',
+    birthDay: '', birthMonth: '', birthYear: '',
+    gender: '',
+    email: '',
+    password: ''
+  }
+
+  // Populate date selects
+  function initSelects() {
+    const daySelect = document.getElementById('birthDay')
+    for (let d = 1; d <= 31; d++) {
+      const o = document.createElement('option')
+      o.value = String(d).padStart(2, '0')
+      o.textContent = d
+      daySelect.appendChild(o)
+    }
+
+    const monthSelect = document.getElementById('birthMonth')
+    const months = ['Janvier','Fevrier','Mars','Avril','Mai','Juin','Juillet','Aout','Septembre','Octobre','Novembre','Decembre']
+    months.forEach((m, i) => {
+      const o = document.createElement('option')
+      o.value = String(i + 1).padStart(2, '0')
+      o.textContent = m
+      monthSelect.appendChild(o)
+    })
+
+    const yearSelect = document.getElementById('birthYear')
+    const currentYear = new Date().getFullYear()
+    for (let y = currentYear; y >= 1920; y--) {
+      const o = document.createElement('option')
+      o.value = String(y)
+      o.textContent = y
+      yearSelect.appendChild(o)
+    }
+  }
+
+  // Navigation
+  function goToStep(n) {
+    currentStep = n
+    document.getElementById('stepsTrack').style.transform = `translateX(-${n * 100}%)`
+    updateDots()
+    updateNav()
+    hideError()
+
+    // Focus first input of new step
+    setTimeout(() => {
+      const step = document.getElementById('step' + (n + 1))
+      const firstInput = step.querySelector('input, select')
+      if (firstInput) firstInput.focus()
+    }, 400)
+  }
+
+  function updateDots() {
+    const dots = document.querySelectorAll('.step-dot')
+    dots.forEach((d, i) => {
+      d.className = 'step-dot'
+      if (i === currentStep) d.classList.add('active')
+      else if (i < currentStep) d.classList.add('done')
+    })
+  }
+
+  function updateNav() {
+    document.getElementById('btnBack').style.visibility = currentStep === 0 ? 'hidden' : 'visible'
+    const btn = document.getElementById('btnNext')
+    if (currentStep === totalSteps - 1) {
+      btn.innerHTML = 'Creer le compte <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>'
+    } else {
+      btn.innerHTML = 'Suivant <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>'
+    }
+  }
+
+  function prevStep() {
+    if (currentStep > 0) goToStep(currentStep - 1)
+  }
+
+  function nextStep() {
+    if (currentStep === totalSteps - 1) {
+      submitRegistration()
+      return
+    }
+    if (validateStep(currentStep)) {
+      // Before moving to step 3, fetch email suggestions
+      if (currentStep === 1) {
+        goToStep(2)
+        fetchEmailSuggestions()
+      } else {
+        goToStep(currentStep + 1)
+      }
+    }
+  }
+
+  // Validation
+  function validateStep(step) {
+    clearFieldErrors()
+    switch (step) {
+      case 0: return validateName()
+      case 1: return validateBirthGender()
+      case 2: return validateEmail()
+      case 3: return validatePassword()
+    }
+    return true
+  }
+
+  function validateName() {
+    const fn = document.getElementById('firstName').value.trim()
+    const ln = document.getElementById('lastName').value.trim()
+    if (!fn) { showFieldError('firstName', 'Prenom requis'); return false }
+    if (!ln) { showFieldError('lastName', 'Nom requis'); return false }
+    formData.firstName = fn
+    formData.lastName = ln
+    return true
+  }
+
+  function validateBirthGender() {
+    const d = document.getElementById('birthDay').value
+    const m = document.getElementById('birthMonth').value
+    const y = document.getElementById('birthYear').value
+    const g = document.getElementById('gender').value
+    if (!d) { showFieldError('birthDay', 'Requis'); return false }
+    if (!m) { showFieldError('birthMonth', 'Requis'); return false }
+    if (!y) { showFieldError('birthYear', 'Requis'); return false }
+    if (!g) { showFieldError('gender', 'Requis'); return false }
+
+    // Validate actual date
+    const date = new Date(parseInt(y), parseInt(m) - 1, parseInt(d))
+    if (date.getDate() !== parseInt(d) || date.getMonth() !== parseInt(m) - 1) {
+      showError('Date de naissance invalide')
+      return false
+    }
+
+    formData.birthDay = d
+    formData.birthMonth = m
+    formData.birthYear = y
+    formData.gender = g
+    return true
+  }
+
+  function validateEmail() {
+    const radios = document.querySelectorAll('input[name="emailChoice"]')
+    let selected = null
+    radios.forEach(r => { if (r.checked) selected = r.value })
+
+    if (!selected) {
+      showError('Veuillez choisir une adresse email')
+      return false
+    }
+
+    if (selected === 'custom') {
+      const custom = document.getElementById('customEmail').value.trim().toLowerCase()
+      if (!custom) { showError('Veuillez saisir une adresse'); return false }
+      if (!/^[a-z0-9._-]{3,30}$/.test(custom)) {
+        showError('Adresse invalide (3-30 car., lettres, chiffres, ., -, _)')
+        return false
+      }
+      if (!customEmailAvailable) {
+        showError('Cette adresse n\'est pas disponible')
+        return false
+      }
+      formData.email = custom + '@terranoweb.win'
+    } else {
+      formData.email = selected
+    }
+    return true
+  }
+
+  function validatePassword() {
+    const p = document.getElementById('regPass').value
+    const c = document.getElementById('regPassConfirm').value
+    if (p.length < 8) { showError('Le mot de passe doit contenir au moins 8 caracteres'); return false }
+    if (p.length > 128) { showError('Le mot de passe ne doit pas depasser 128 caracteres'); return false }
+    if (!/[a-zA-Z]/.test(p)) { showError('Le mot de passe doit contenir au moins une lettre'); return false }
+    if (!/[0-9]/.test(p)) { showError('Le mot de passe doit contenir au moins un chiffre'); return false }
+    if (p !== c) { showError('Les mots de passe ne correspondent pas'); return false }
+    formData.password = p
+    return true
+  }
+
+  // Error display
+  function showError(msg) {
+    const el = document.getElementById('regError')
+    el.textContent = msg
+    el.style.display = 'block'
+    el.style.animation = 'none'
+    el.offsetHeight // force reflow
+    el.style.animation = 'shakeError .4s'
+  }
+
+  function hideError() {
+    document.getElementById('regError').style.display = 'none'
+  }
+
+  function showFieldError(fieldId, msg) {
+    const field = document.getElementById(fieldId)
+    if (field) field.parentElement.classList.add('error')
+    showError(msg)
+  }
+
+  function clearFieldErrors() {
+    document.querySelectorAll('.reg-field.error').forEach(f => f.classList.remove('error'))
+  }
+
+  // Fetch email suggestions
+  async function fetchEmailSuggestions() {
+    const loading = document.getElementById('emailLoading')
+    const options = document.getElementById('emailOptions')
+    const customWrap = document.getElementById('customEmailWrap')
+
+    loading.style.display = 'flex'
+    options.style.display = 'none'
+    customWrap.classList.remove('show')
+
+    try {
+      const params = new URLSearchParams({
+        firstName: formData.firstName,
+        lastName: formData.lastName
+      })
+      const r = await fetch('/api/auth/suggest-email?' + params)
+      const d = await r.json()
+
+      if (d.ok && d.suggestions) {
+        emailSuggestions = d.suggestions
+        renderEmailOptions(d.suggestions)
+      }
+    } catch (e) {
+      showError('Erreur lors de la generation des adresses')
+    } finally {
+      loading.style.display = 'none'
+    }
+  }
+
+  function renderEmailOptions(suggestions) {
+    const container = document.getElementById('emailOptions')
+    container.innerHTML = ''
+
+    suggestions.forEach((email, i) => {
+      const label = document.createElement('label')
+      label.className = 'email-option' + (i === 0 ? ' selected' : '')
+      label.innerHTML = `
+        <input type="radio" name="emailChoice" value="${email}" ${i === 0 ? 'checked' : ''} onchange="onEmailChange()">
+        <span class="email-addr">${email}</span>
+      `
+      container.appendChild(label)
+    })
+
+    // Custom option
+    const customLabel = document.createElement('label')
+    customLabel.className = 'email-option'
+    customLabel.innerHTML = `
+      <input type="radio" name="emailChoice" value="custom" onchange="onEmailChange()">
+      <span class="email-addr">Creer votre propre adresse</span>
+    `
+    container.appendChild(customLabel)
+
+    container.style.display = 'flex'
+  }
+
+  function onEmailChange() {
+    const radios = document.querySelectorAll('input[name="emailChoice"]')
+    const customWrap = document.getElementById('customEmailWrap')
+
+    // Update selected visual
+    document.querySelectorAll('.email-option').forEach(o => o.classList.remove('selected'))
+    radios.forEach(r => {
+      if (r.checked) {
+        r.closest('.email-option').classList.add('selected')
+        if (r.value === 'custom') {
+          customWrap.classList.add('show')
+          setTimeout(() => document.getElementById('customEmail').focus(), 300)
+        } else {
+          customWrap.classList.remove('show')
+        }
+      }
+    })
+  }
+
+  // Check custom email availability
+  function checkCustomEmail() {
+    const input = document.getElementById('customEmail')
+    const avail = document.getElementById('emailAvail')
+    const val = input.value.trim().toLowerCase()
+
+    if (checkEmailTimeout) clearTimeout(checkEmailTimeout)
+
+    if (!val) {
+      avail.textContent = ''
+      avail.className = 'email-avail'
+      customEmailAvailable = false
+      return
+    }
+
+    if (val.length < 3) {
+      avail.textContent = 'Minimum 3 caracteres'
+      avail.className = 'email-avail taken'
+      customEmailAvailable = false
+      return
+    }
+
+    if (!/^[a-z0-9._-]+$/.test(val)) {
+      avail.textContent = 'Caracteres invalides'
+      avail.className = 'email-avail taken'
+      customEmailAvailable = false
+      return
+    }
+
+    avail.textContent = 'Verification...'
+    avail.className = 'email-avail'
+
+    checkEmailTimeout = setTimeout(async () => {
+      try {
+        const r = await fetch('/api/auth/check-email?email=' + encodeURIComponent(val))
+        const d = await r.json()
+        if (d.ok) {
+          if (d.available) {
+            avail.textContent = val + '@terranoweb.win est disponible'
+            avail.className = 'email-avail ok'
+            customEmailAvailable = true
+          } else {
+            avail.textContent = 'Cette adresse est deja prise'
+            avail.className = 'email-avail taken'
+            customEmailAvailable = false
+          }
+        }
+      } catch {
+        avail.textContent = 'Erreur de verification'
+        avail.className = 'email-avail taken'
+        customEmailAvailable = false
+      }
+    }, 400)
+  }
+
+  // Password visibility toggle
+  function toggleVis(inputId, btn) {
+    const input = document.getElementById(inputId)
+    const isPass = input.type === 'password'
+    input.type = isPass ? 'text' : 'password'
+    btn.innerHTML = isPass
+      ? '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+      : '<svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'
+  }
+
+  // Submit registration
+  async function submitRegistration() {
+    if (!validateStep(3)) return
+
+    const btn = document.getElementById('btnNext')
+    btn.disabled = true
+    btn.innerHTML = '<svg class="spin" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg> Creation...'
+    btn.querySelector('.spin').style.animation = 'spin 1s linear infinite'
+
+    const birthDate = `${formData.birthYear}-${formData.birthMonth}-${formData.birthDay}`
+    const username = formData.email.split('@')[0]
+
+    try {
+      const r = await fetch('/api/auth/register', {
+        method: 'POST',
+        credentials: 'include',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          firstName: formData.firstName,
+          lastName: formData.lastName,
+          birthDate: birthDate,
+          gender: formData.gender,
+          email: formData.email,
+          username: username,
+          displayName: formData.firstName + ' ' + formData.lastName,
+          password: formData.password
+        })
+      })
+      const d = await r.json()
+
+      if (!d.ok) {
+        showError(d.error || 'Erreur lors de la creation du compte')
+        btn.disabled = false
+        updateNav()
+        return
+      }
+
+      // Success!
+      document.getElementById('stepsViewport').style.display = 'none'
+      document.getElementById('stepDots').style.display = 'none'
+      document.getElementById('regNav').style.display = 'none'
+      document.getElementById('regError').style.display = 'none'
+      document.getElementById('createdEmail').textContent = formData.email
+      document.getElementById('regSuccess').style.display = 'block'
+
+    } catch (e) {
+      showError('Erreur serveur. Veuillez reessayer.')
+      btn.disabled = false
+      updateNav()
+    }
+  }
+
+  // Keyboard support
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      nextStep()
+    }
+  })
+
+  // Init
+  initSelects()
+
+  // Add spin keyframe dynamically
+  const styleSheet = document.createElement('style')
+  styleSheet.textContent = '@keyframes spin { to { transform: rotate(360deg); } }'
+  document.head.appendChild(styleSheet)
+</script>
+</body>
+</html>

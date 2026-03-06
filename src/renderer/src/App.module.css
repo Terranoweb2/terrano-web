@@ -1,0 +1,13 @@
+.app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+.contentArea {
+  flex: 1;
+  position: relative;
+  /* Le TabView (contenu web) est placé AU-DESSUS du Shell et couvre cette zone.
+     Le sidebar s'affiche ici quand le TabView est rétréci par le main process. */
+}

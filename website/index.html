@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TerranoWeb — Portail d'accueil</title>
+  <meta name="description" content="TerranoWeb - Votre portail d'accueil avec actualites AES, recherche et email @terranoweb.win">
+  <link rel="icon" type="image/png" href="/favicon.png?v=2">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#10b981">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="/favicon.png">
+  <script src="/hls.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --emerald: #10b981; --emerald-dark: #059669; --emerald-light: #d1fae5;
+      --emerald-glow: rgba(16,185,129,0.15);
+      --bg: #0f172a; --bg-card: #1e293b; --text: #f1f5f9;
+      --text-muted: #94a3b8; --border: #334155; --danger: #ef4444;
+    }
+    body { font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; min-height: 100vh; }
+
+    /* NAV */
+    nav { display:flex; align-items:center; justify-content:space-between; padding:0 32px; height:56px; background:rgba(15,23,42,0.95); backdrop-filter:blur(12px); border-bottom:1px solid var(--border); position:fixed; top:0; left:0; right:0; z-index:100; }
+    .nav-left { display:flex; align-items:center; gap:24px; }
+    .nav-logo { display:flex; align-items:center; text-decoration:none; }
+    .nav-logo img { height:32px; width:auto; }
+    .nav-link { color:var(--text-muted); text-decoration:none; font-size:13px; transition:color .2s; }
+    .nav-link:hover { color:var(--text); }
+
+    /* AUTH WIDGET */
+    .auth-w { position:relative; }
+    .auth-trigger { display:flex; align-items:center; gap:8px; padding:7px 16px; background:var(--emerald); color:#fff; border:none; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; transition:background .2s; }
+    .auth-trigger:hover { background:var(--emerald-dark); }
+    .auth-user-btn { display:flex; align-items:center; gap:8px; padding:6px 14px; background:var(--bg-card); border:1px solid var(--border); border-radius:8px; cursor:pointer; color:var(--text); font-size:13px; transition:border-color .2s; }
+    .auth-user-btn:hover { border-color:var(--emerald); }
+    .av { width:26px; height:26px; border-radius:50%; background:var(--emerald); color:#fff; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:600; flex-shrink:0; }
+    .auth-panel { display:none; position:absolute; top:calc(100% + 8px); right:0; width:300px; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:0 20px 60px rgba(0,0,0,.5); z-index:200; }
+    .auth-panel.open { display:block; }
+    .auth-panel h3 { font-size:16px; font-weight:600; margin-bottom:4px; }
+    .auth-panel .sub { font-size:12px; color:var(--text-muted); margin-bottom:16px; }
+    .af { display:flex; flex-direction:column; gap:4px; margin-bottom:12px; }
+    .af label { font-size:11px; font-weight:500; color:var(--text-muted); text-transform:uppercase; letter-spacing:.5px; }
+    .af input { height:36px; padding:0 12px; background:var(--bg); border:1px solid var(--border); border-radius:6px; color:var(--text); font-size:13px; outline:none; transition:border-color .2s; }
+    .af input:focus { border-color:var(--emerald); }
+    .email-prev { font-size:11px; color:var(--emerald); margin-top:2px; }
+    .ab { width:100%; height:38px; background:var(--emerald); color:#fff; border:none; border-radius:6px; font-size:13px; font-weight:500; cursor:pointer; transition:background .2s; margin-top:4px; }
+    .ab:hover { background:var(--emerald-dark); }
+    .ab:disabled { opacity:.5; cursor:default; }
+    .asw { text-align:center; margin-top:12px; font-size:12px; color:var(--text-muted); }
+    .asw a { color:var(--emerald); cursor:pointer; text-decoration:none; }
+    .asw a:hover { text-decoration:underline; }
+    .ae { font-size:12px; color:var(--danger); text-align:center; margin-top:8px; display:none; }
+    .aui { text-align:center; }
+    .aui .em { font-size:14px; font-weight:500; color:var(--emerald); margin:8px 0 4px; }
+    .aui .nm { font-size:12px; color:var(--text-muted); margin-bottom:16px; }
+    .alo { width:100%; height:34px; background:transparent; border:1px solid var(--border); border-radius:6px; color:var(--text-muted); font-size:12px; cursor:pointer; transition:all .2s; }
+    .alo:hover { background:rgba(239,68,68,.1); color:var(--danger); border-color:var(--danger); }
+
+    /* HERO — 3 column layout */
+    .hero { display:grid; grid-template-columns:320px 1fr 300px; gap:20px; align-items:start; padding:80px 24px 32px; max-width:1400px; margin:0 auto; }
+    .hero-center { display:flex; flex-direction:column; align-items:center; padding-top:20px; }
+    .hl { margin-bottom:32px; }
+    .hl img { height:72px; width:auto; }
+    .sb { display:flex; align-items:center; width:100%; background:var(--bg-card); border:2px solid var(--border); border-radius:9999px; padding:0 20px; height:52px; gap:12px; transition:border-color .2s,box-shadow .2s; }
+    .sb:focus-within { border-color:var(--emerald); box-shadow:0 0 0 3px var(--emerald-glow); }
+    .sb svg { flex-shrink:0; color:var(--text-muted); }
+    .sb input { flex:1; height:100%; background:transparent; border:none; outline:none; color:var(--text); font-size:15px; }
+    .sb input::placeholder { color:var(--text-muted); }
+    .sb button { padding:8px 20px; background:var(--emerald); color:#fff; border:none; border-radius:9999px; font-size:13px; font-weight:500; cursor:pointer; flex-shrink:0; transition:background .2s; }
+    .sb button:hover { background:var(--emerald-dark); }
+    .ql { display:flex; gap:12px; margin-top:20px; flex-wrap:wrap; justify-content:center; }
+    .ql a { padding:6px 14px; background:var(--bg-card); border:1px solid var(--border); border-radius:9999px; color:var(--text-muted); font-size:12px; text-decoration:none; transition:border-color .2s,color .2s; }
+    .ql a:hover { border-color:var(--emerald); color:var(--text); }
+    .ql-mode { display:inline-flex !important; align-items:center; gap:5px; }
+    .ql-mode.active { background:var(--emerald) !important; color:#fff !important; border-color:var(--emerald) !important; }
+    .ql-mode svg { flex-shrink:0; }
+
+    /* VIDEO WIDGETS */
+    .vw { display:flex; flex-direction:column; gap:10px; padding-top:10px; min-width:0; overflow:hidden; }
+    #vw-right { max-height:calc(100vh - 100px); overflow-y:auto; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+    #vw-right::-webkit-scrollbar { width:3px; }
+    #vw-right::-webkit-scrollbar-thumb { background:var(--border); border-radius:3px; }
+    .vw-title { display:flex; align-items:center; gap:8px; font-size:14px; font-weight:600; margin-bottom:4px; white-space:nowrap; }
+    #vw-right .vw-title { position:sticky; top:0; background:var(--bg); padding:4px 0; z-index:1; }
+    .vw-title svg { color:var(--emerald); flex-shrink:0; }
+    .vw-title .vw-badge { font-size:10px; font-weight:600; padding:2px 8px; border-radius:4px; text-transform:uppercase; letter-spacing:.5px; }
+    .vw-badge-rt { background:rgba(16,185,129,0.15); color:var(--emerald); }
+    .vw-badge-yt { background:rgba(239,68,68,0.15); color:#ef4444; }
+    /* VIDEO SLIDER */
+    .vs-wrap { position:relative; border-radius:10px; overflow:hidden; background:var(--bg-card); border:1px solid var(--border); }
+    .vs-viewport { position:relative; aspect-ratio:16/9; background:#000; overflow:hidden; }
+    .vs-track { display:flex; height:100%; transition:transform .4s cubic-bezier(.4,0,.2,1); }
+    .vs-slide { min-width:100%; position:relative; }
+    .vs-slide img { width:100%; height:100%; object-fit:cover; display:block; }
+    .vs-slide iframe { position:absolute; top:0; left:0; width:100%; height:100%; border:none; }
+    .vs-overlay { position:absolute; bottom:0; left:0; right:0; padding:10px 12px; background:linear-gradient(transparent,rgba(0,0,0,.85)); z-index:2; pointer-events:none; }
+    .vs-overlay .vs-src { font-size:9px; font-weight:600; color:var(--emerald); text-transform:uppercase; letter-spacing:.5px; }
+    .vs-overlay .vs-t { font-size:12px; font-weight:500; color:#fff; line-height:1.3; margin-top:2px; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .vs-overlay .vs-d { font-size:10px; color:rgba(255,255,255,.6); margin-top:2px; }
+    .vs-arr { position:absolute; top:50%; transform:translateY(-50%); width:28px; height:28px; border:none; border-radius:50%; background:rgba(0,0,0,.55); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; z-index:3; transition:background .2s; backdrop-filter:blur(4px); }
+    .vs-arr:hover { background:rgba(0,0,0,.8); }
+    .vs-arr-l { left:6px; }
+    .vs-arr-r { right:6px; }
+    .vs-arr svg { width:14px; height:14px; }
+    .vs-dots { display:flex; justify-content:center; gap:5px; padding:6px 0; }
+    .vs-dot { width:6px; height:6px; border-radius:50%; background:var(--border); border:none; padding:0; cursor:pointer; transition:all .2s; }
+    .vs-dot.active { background:#ef4444; width:16px; border-radius:3px; }
+    .vs-yt-link { display:flex; align-items:center; justify-content:center; gap:4px; padding:4px 0 6px; font-size:10px; color:var(--text-muted); text-decoration:none; transition:color .2s; }
+    .vs-yt-link:hover { color:#ef4444; }
+    .vs-yt-link svg { width:12px; height:12px; }
+    /* TRENDS MODULE */
+
+    /* RT LIVE PLAYER */
+    .rt-player-wrap { position:relative; width:100%; border-radius:10px; overflow:hidden; background:#000; border:1px solid var(--border); }
+    .rt-player-wrap video { width:100%; display:block; border-radius:10px; aspect-ratio:16/9; background:#000; }
+    .rt-live-badge { position:absolute; top:8px; left:8px; display:flex; align-items:center; gap:5px; background:rgba(0,0,0,.7); padding:3px 10px; border-radius:6px; font-size:11px; font-weight:600; color:#fff; z-index:2; pointer-events:none; }
+    .rt-live-dot { width:8px; height:8px; border-radius:50%; background:#ef4444; animation:pulse-dot 1.5s infinite; }
+    @keyframes pulse-dot { 0%,100%{opacity:1} 50%{opacity:.4} }
+    .rt-unmute { position:absolute; bottom:8px; right:8px; background:rgba(0,0,0,.65); border:1px solid rgba(255,255,255,.2); color:#fff; padding:6px 12px; border-radius:6px; font-size:11px; cursor:pointer; z-index:2; display:flex; align-items:center; gap:5px; transition:background .2s; }
+    .rt-unmute:hover { background:rgba(0,0,0,.85); }
+    .rt-unmute svg { width:16px; height:16px; }
+    .rt-error-overlay { position:absolute; inset:0; background:rgba(0,0,0,.85); display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; color:#fff; z-index:5; border-radius:10px; }
+    .rt-error-overlay svg { color:#f59e0b; }
+    .rt-error-overlay span { font-size:13px; font-weight:500; }
+    .rt-error-overlay button { margin-top:4px; background:var(--emerald); color:#fff; border:none; padding:6px 16px; border-radius:6px; font-size:12px; cursor:pointer; transition:opacity .2s; }
+    .rt-error-overlay button:hover { opacity:.85; }
+
+    /* PROMO VIDEO */
+    .promo-video-wrap { position:relative; width:100%; margin:8px 0 0; border-radius:10px; overflow:hidden; background:#000; border:1px solid var(--border); transition:border-color .2s; }
+    .promo-video-wrap:hover { border-color:var(--emerald); }
+    .promo-video { width:100%; display:block; aspect-ratio:16/9; object-fit:cover; }
+    .promo-badge { position:absolute; top:8px; right:8px; display:flex; align-items:center; gap:4px; background:rgba(0,0,0,.7); padding:3px 8px; border-radius:4px; font-size:9px; font-weight:600; color:var(--text-muted); z-index:2; white-space:nowrap; pointer-events:none; letter-spacing:.3px; text-transform:uppercase; }
+    .promo-badge svg { flex-shrink:0; }
+
+    .vw-sk { border-radius:10px; background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.5s infinite; height:180px; }
+    .vw-sk-sm { height:44px; border-radius:8px; background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.5s infinite; }
+
+    /* NEWS IMAGE SLIDER */
+    .news-slider { width:100%; max-width:560px; margin:20px auto 0; padding:0; }
+    .slider-wrap { position:relative; width:100%; border-radius:14px; overflow:hidden; background:var(--bg-card); border:1px solid var(--border); aspect-ratio:16/9; box-shadow:0 4px 20px rgba(0,0,0,.25); }
+    .slider-track { display:flex; width:100%; height:100%; transition:transform .5s cubic-bezier(.4,0,.2,1); }
+    .slider-slide { flex:0 0 100%; position:relative; overflow:hidden; }
+    .slider-slide img { width:100%; height:100%; object-fit:cover; display:block; transition:transform 6s ease; }
+    .slider-slide.active img { transform:scale(1.05); }
+    .slider-overlay { position:absolute; inset:0; background:linear-gradient(0deg,rgba(0,0,0,.8) 0%,rgba(0,0,0,.1) 45%,rgba(0,0,0,0) 100%); }
+    .slider-content { position:absolute; bottom:0; left:0; right:0; padding:16px 20px; z-index:2; }
+    .slider-src { font-size:10px; font-weight:700; color:var(--emerald); text-transform:uppercase; letter-spacing:.8px; margin-bottom:3px; }
+    .slider-title { font-size:16px; font-weight:700; color:#fff; line-height:1.3; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 3px rgba(0,0,0,.6); }
+    .slider-time { font-size:11px; color:rgba(255,255,255,.6); margin-top:4px; }
+    .slider-nav { position:absolute; bottom:10px; right:16px; display:flex; gap:5px; z-index:3; }
+    .slider-dot { width:6px; height:6px; border-radius:50%; background:rgba(255,255,255,.3); border:none; cursor:pointer; transition:all .3s; padding:0; }
+    .slider-dot.active { background:var(--emerald); width:20px; border-radius:3px; }
+    .slider-arrows { position:absolute; top:50%; left:0; right:0; z-index:3; display:flex; justify-content:space-between; padding:0 6px; transform:translateY(-50%); pointer-events:none; opacity:0; transition:opacity .25s; }
+    .slider-wrap:hover .slider-arrows { opacity:1; }
+    .slider-arr { width:30px; height:30px; border-radius:50%; background:rgba(0,0,0,.5); border:1px solid rgba(255,255,255,.12); color:#fff; display:flex; align-items:center; justify-content:center; cursor:pointer; pointer-events:all; transition:all .2s; backdrop-filter:blur(8px); }
+    .slider-arr:hover { background:var(--emerald); border-color:var(--emerald); transform:scale(1.1); }
+    .slider-arr svg { width:15px; height:15px; }
+    .slider-sk { width:100%; height:100%; background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.5s infinite; }
+    .slider-progress { position:absolute; bottom:0; left:0; height:2px; background:var(--emerald); z-index:4; transition:width 6s linear; width:0; }
+    .slider-progress.active { width:100%; }
+
+    /* EMERALD SEPARATOR */
+    .em-sep { max-width:1200px; margin:16px auto; padding:0 20px; }
+    .em-sep-line { height:3px; border-radius:2px; background:linear-gradient(90deg,transparent,var(--emerald),transparent); }
+
+    @media(max-width:768px) {
+      .slider-wrap { aspect-ratio:16/9; }
+      .slider-title { font-size:13px; }
+      .slider-content { padding:10px 14px; }
+      .slider-src { font-size:9px; }
+      .slider-time { font-size:10px; }
+      .slider-arrows { opacity:1; }
+      .slider-arr { width:26px; height:26px; }
+      .slider-arr svg { width:13px; height:13px; }
+      .slider-nav { bottom:6px; right:10px; }
+      .slider-dot { width:5px; height:5px; }
+      .slider-dot.active { width:16px; }
+    }
+    @media(max-width:420px) {
+      .slider-title { font-size:12px; }
+    }
+
+    /* BREAKING / HOT NEWS */
+    .breaking { max-width:1200px; margin:0 auto; padding:12px 20px 0; }
+    .breaking-header { display:flex; align-items:center; gap:10px; margin-bottom:14px; }
+    .breaking-header h2 { font-size:20px; font-weight:700; }
+    .breaking-fire { display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600; color:#ef4444; background:rgba(239,68,68,0.12); padding:3px 10px; border-radius:6px; text-transform:uppercase; letter-spacing:.5px; }
+    .breaking-fire .bk-dot { width:7px; height:7px; border-radius:50%; background:#ef4444; animation:pulse-dot 1.2s infinite; }
+    .breaking-refresh { font-size:11px; color:var(--text-muted); margin-left:auto; display:flex; align-items:center; gap:4px; }
+    .breaking-refresh svg { width:14px; height:14px; animation:none; }
+    .breaking-refresh.loading svg { animation:spin-icon .8s linear infinite; }
+    @keyframes spin-icon { 0%{transform:rotate(0deg)} 100%{transform:rotate(360deg)} }
+    .bk-scroll { display:flex; gap:14px; overflow-x:auto; padding-bottom:12px; scroll-snap-type:x mandatory; -webkit-overflow-scrolling:touch; scrollbar-width:thin; scrollbar-color:var(--border) transparent; }
+    .bk-scroll::-webkit-scrollbar { height:4px; }
+    .bk-scroll::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+    .bk-card { flex:0 0 280px; scroll-snap-align:start; display:flex; flex-direction:column; background:var(--bg-card); border:1px solid var(--border); border-radius:10px; overflow:hidden; text-decoration:none; color:var(--text); transition:border-color .2s,transform .15s; }
+    .bk-card:hover { border-color:var(--emerald); transform:translateY(-2px); }
+    .bk-card img { width:100%; height:130px; object-fit:cover; background:var(--border); }
+    .bk-body { padding:10px 12px; display:flex; flex-direction:column; gap:3px; flex:1; }
+    .bk-src { font-size:10px; font-weight:600; color:#ef4444; text-transform:uppercase; letter-spacing:.5px; }
+    .bk-title { font-size:13px; font-weight:600; line-height:1.35; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .bk-time { font-size:11px; color:var(--text-muted); margin-top:auto; padding-top:4px; }
+    .bk-sk { flex:0 0 280px; height:200px; border-radius:10px; background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.5s infinite; }
+
+    /* NEWS */
+    .ns { max-width:1200px; margin:0 auto; padding:20px 20px 60px; }
+    .nh { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; flex-wrap:wrap; gap:12px; }
+    .nh h2 { font-size:22px; font-weight:700; }
+    .tabs { display:flex; gap:4px; background:var(--bg-card); border-radius:10px; padding:4px; }
+    .tab { padding:8px 18px; background:none; border:none; border-radius:8px; color:var(--text-muted); font-size:13px; font-weight:500; cursor:pointer; transition:all .2s; white-space:nowrap; }
+    .tab.active { background:var(--emerald); color:#fff; }
+    .tab:not(.active):hover { color:var(--text); background:rgba(255,255,255,.05); }
+    .ng { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:16px; }
+    .nc { display:flex; flex-direction:column; background:var(--bg-card); border:1px solid var(--border); border-radius:12px; overflow:hidden; text-decoration:none; color:var(--text); transition:border-color .2s,transform .15s; }
+    .nc:hover { border-color:var(--emerald); transform:translateY(-2px); }
+    .nc img { width:100%; height:160px; object-fit:cover; background:var(--border); }
+    .ncb { padding:14px 16px; display:flex; flex-direction:column; gap:4px; flex:1; }
+    .ncs { font-size:11px; font-weight:600; color:var(--emerald); text-transform:uppercase; letter-spacing:.5px; }
+    .nct { font-size:15px; font-weight:600; line-height:1.4; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .ncx { font-size:13px; color:var(--text-muted); line-height:1.5; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .ncd { font-size:12px; color:var(--text-muted); margin-top:auto; padding-top:8px; }
+    .sk img, .skb { background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.5s infinite; }
+    .skl { height:14px; border-radius:4px; background:linear-gradient(90deg,var(--border) 25%,#3b4f6b 50%,var(--border) 75%); background-size:200% 100%; animation:sh 1.5s infinite; margin:6px 0; }
+    .skl.s { width:40%; } .skl.m { width:70%; }
+    @keyframes sh { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+    .ne { grid-column:1/-1; text-align:center; padding:60px 20px; color:var(--text-muted); }
+    .ne svg { margin-bottom:12px; opacity:.4; }
+    .bk-scroll:empty, .ng:empty { display:none; }
+    .bk-card img[src=""], .nc img[src=""] { display:none; }
+
+    /* DOWNLOAD SECTION */
+    .dl-section { max-width:900px; margin:0 auto; padding:40px 20px 20px; text-align:center; }
+    .dl-section h2 { font-size:24px; font-weight:700; margin-bottom:6px; }
+    .dl-section .dl-sub { font-size:14px; color:var(--text-muted); margin-bottom:24px; }
+    .dl-cards { display:flex; gap:20px; justify-content:center; flex-wrap:wrap; }
+    .dl-card { flex:0 1 320px; background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:28px 24px; text-align:center; transition:border-color .2s,transform .15s; }
+    .dl-card:hover { border-color:var(--emerald); transform:translateY(-2px); }
+    .dl-card .dl-icon { font-size:40px; margin-bottom:12px; }
+    .dl-card h3 { font-size:17px; font-weight:600; margin-bottom:4px; }
+    .dl-card .dl-size { font-size:12px; color:var(--text-muted); margin-bottom:16px; }
+    .dl-card .dl-btn { display:inline-flex; align-items:center; gap:8px; padding:10px 28px; border-radius:8px; text-decoration:none; font-size:14px; font-weight:600; transition:background .2s; }
+    .dl-btn-win { background:var(--emerald); color:#fff; }
+    .dl-btn-win:hover { background:var(--emerald-dark); color:#fff; }
+    .dl-btn-apk { background:#3b82f6; color:#fff; }
+    .dl-btn-apk:hover { background:#2563eb; color:#fff; }
+    .dl-card .dl-req { font-size:11px; color:var(--text-muted); margin-top:12px; }
+
+    /* FOOTER */
+    footer { border-top:1px solid var(--border); padding:32px 20px; text-align:center; color:var(--text-muted); font-size:12px; }
+    .fl { display:flex; justify-content:center; gap:24px; margin-bottom:12px; }
+    footer a { color:var(--text-muted); text-decoration:none; transition:color .2s; }
+    footer a:hover { color:var(--emerald); }
+    .ov { display:none; position:fixed; inset:0; z-index:99; }
+    .ov.open { display:block; }
+    /* LARGE SCREENS */
+    @media(min-width:1500px) {
+      .hero { grid-template-columns:360px 1fr 320px; gap:24px; }
+    }
+    /* TABLET */
+    @media(max-width:1024px) {
+      .hero { grid-template-columns:1fr; max-width:640px; padding-top:80px; }
+      .hero-center { padding-top:0; order:-1; }
+      .vw { padding-top:0; }
+      #vw-left { order:0; }
+      #vw-right { order:1; }
+    }
+
+    /* MOBILE */
+    @media(max-width:768px) {
+      body { overflow-x:hidden; }
+      nav { padding:0 12px; gap:8px; }
+      .nav-link { display:none; }
+      .nav-left { gap:12px; }
+      .nav-logo img { height:28px; }
+      .auth-trigger { padding:6px 12px; font-size:12px; gap:5px; }
+      .auth-trigger svg { width:14px; height:14px; }
+      .auth-user-btn { padding:5px 10px; font-size:12px; gap:5px; }
+      .av { width:22px; height:22px; font-size:10px; }
+      .auth-panel { width:calc(100vw - 24px); right:-6px; padding:16px; }
+
+      .hero { padding:68px 14px 20px; gap:16px; }
+      .hero-center { order:-1; }
+      .hl { margin-bottom:20px; }
+      .hl img { height:48px; }
+      .sb { height:44px; padding:0 12px; gap:8px; border-width:1.5px; }
+      .sb input { font-size:14px; }
+      .sb button { padding:7px 14px; font-size:12px; }
+      .ql { gap:8px; margin-top:14px; }
+      .ql a { padding:5px 12px; font-size:11px; }
+
+      .vw-title { font-size:13px; }
+      .rt-player-wrap video { aspect-ratio:16/9; }
+      .vs-arr { width:24px; height:24px; }
+      .vs-overlay .vs-t { font-size:11px; }
+
+      .em-sep { margin:12px auto; padding:0 12px; }
+
+      .breaking { padding:10px 12px 0; }
+      .breaking-header h2 { font-size:17px; }
+      .breaking-fire { font-size:10px; padding:2px 8px; }
+      .bk-scroll { gap:10px; padding-bottom:10px; }
+      .bk-card { flex:0 0 220px; }
+      .bk-card img { height:100px; }
+      .bk-body { padding:8px 10px; }
+      .bk-title { font-size:12px; }
+      .bk-src { font-size:9px; }
+
+      .ns { padding:14px 12px 40px; }
+      .nh h2 { font-size:18px; }
+      .tabs { overflow-x:auto; -webkit-overflow-scrolling:touch; scrollbar-width:none; }
+      .tabs::-webkit-scrollbar { display:none; }
+      .tab { padding:7px 14px; font-size:12px; }
+      .ng { grid-template-columns:1fr; gap:12px; }
+      .nc img { height:140px; }
+      .ncb { padding:12px 14px; }
+      .nct { font-size:14px; }
+      .ncx { font-size:12px; }
+
+      .dl-section { padding:30px 14px 20px; }
+      .dl-section h2 { font-size:20px; }
+      .dl-section .dl-sub { font-size:13px; margin-bottom:18px; }
+      .dl-cards { flex-direction:column; align-items:center; gap:14px; }
+      .dl-card { flex:0 1 100%; width:100%; max-width:360px; padding:22px 18px; }
+      .dl-card h3 { font-size:16px; }
+      .dl-card .dl-btn { padding:9px 22px; font-size:13px; }
+
+      footer { padding:20px 14px; }
+      .fl { gap:16px; margin-bottom:10px; }
+    }
+
+    /* SMALL PHONES */
+    @media(max-width:420px) {
+      nav { height:48px; }
+      .hero { padding:58px 10px 16px; }
+      .hl img { height:40px; }
+      .sb { height:40px; padding:0 10px; }
+      .sb input { font-size:13px; }
+      .sb button { padding:6px 12px; font-size:11px; }
+      .ql a { padding:4px 10px; font-size:10px; }
+      .vw-title { font-size:12px; }
+      .vw-title .vw-badge { font-size:9px; }
+      .vs-overlay .vs-t { font-size:11px; }
+      .breaking-header h2 { font-size:15px; }
+      .bk-card { flex:0 0 190px; }
+      .bk-card img { height:85px; }
+      .bk-title { font-size:11px; }
+      .nh h2 { font-size:16px; }
+      .tab { padding:6px 12px; font-size:11px; }
+      .nc img { height:120px; }
+      .nct { font-size:13px; }
+      .dl-section h2 { font-size:18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="ov" id="ov" onclick="closeAuth()"></div>
+
+  <nav>
+    <div class="nav-left">
+      <a href="/" class="nav-logo"><img src="/logo.png?v=2" alt="TerranoWeb"></a>
+      <a href="#news" class="nav-link">Actualites</a>
+      <a href="#download" class="nav-link">Telecharger</a>
+      <a href="/mail" class="nav-link nav-mail" id="navMail" style="display:none;position:relative">Messagerie <span class="mail-badge" id="mailBadge" style="display:none;position:absolute;top:-6px;right:-12px;background:#ef4444;color:#fff;font-size:10px;font-weight:700;padding:1px 5px;border-radius:8px;min-width:16px;text-align:center">0</span></a>
+    </div>
+    <div class="auth-w" id="aw"></div>
+  </nav>
+
+  <section class="hero">
+    <!-- LEFT: RT France Live Player -->
+    <div class="vw" id="vw-left">
+      <div class="vw-title">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+        <span>RT en fran&ccedil;ais</span>
+        <span class="vw-badge vw-badge-rt">Direct</span>
+      </div>
+      <div class="rt-player-wrap" id="rt-player-wrap">
+        <div class="rt-live-badge"><span class="rt-live-dot"></span> EN DIRECT</div>
+        <video id="rt-video" playsinline></video>
+        <button class="rt-unmute" id="rt-unmute" onclick="toggleRTMute()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+          <span>Son coup&eacute;</span>
+        </button>
+        <div class="rt-error-overlay" id="rt-error-overlay" style="display:none">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="32" height="32"><path d="M12 9v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+          <span>Signal indisponible</span>
+          <button onclick="document.getElementById('rt-error-overlay').style.display='none';initRTPlayer()">R&eacute;essayer</button>
+        </div>
+      </div>
+
+      <!-- PROMO VIDEO -->
+      <div class="promo-video-wrap">
+        <div class="promo-badge"><svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Sponsoris&eacute;</div>
+        <video class="promo-video" autoplay muted loop playsinline>
+          <source src="/T-Delivery.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+
+    <!-- CENTER: Logo + Search -->
+    <div class="hero-center">
+      <div class="hl"><img src="/logo.png?v=2" alt="TerranoWeb"></div>
+      <form class="sb" onsubmit="doSearch(event)">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="si" placeholder="Rechercher sur le web ou entrer une adresse..." autofocus autocomplete="off">
+        <button type="submit">Rechercher</button>
+      </form>
+      <div class="ql" id="search-modes">
+        <a href="#" class="ql-mode active" data-mode="web" onclick="setMode('web',this);return false"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Web</a>
+        <a href="#" class="ql-mode" data-mode="images" onclick="setMode('images',this);return false"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg> Images</a>
+        <a href="#" class="ql-mode" data-mode="videos" onclick="setMode('videos',this);return false"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg> Vid&eacute;os</a>
+        <a href="#" class="ql-mode" data-mode="ia" onclick="setMode('ia',this);return false"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 2a4 4 0 014 4v1a4 4 0 01-8 0V6a4 4 0 014-4z"/><path d="M6 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="12" cy="10" r="0" fill="currentColor"><animate attributeName="r" values="0;2;0" dur="1.5s" repeatCount="indefinite"/></circle></svg> IA</a>
+      </div>
+
+      <!-- NEWS IMAGE SLIDER (inside hero center) -->
+      <div class="news-slider" id="news-slider">
+        <div class="slider-wrap" id="slider-wrap">
+          <div class="slider-track" id="slider-track">
+            <div class="slider-slide"><div class="slider-sk"></div></div>
+          </div>
+          <div class="slider-arrows">
+            <button class="slider-arr" onclick="slideNav(-1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+            <button class="slider-arr" onclick="slideNav(1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+          </div>
+          <div class="slider-nav" id="slider-nav"></div>
+          <div class="slider-progress" id="slider-progress"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Random Video News -->
+    <div class="vw" id="vw-right">
+      <div class="vw-title">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M3 4v16" stroke="#29B6F6" stroke-width="3" stroke-linecap="round"/><path d="M3 20l18-8" stroke="#FDD835" stroke-width="3" stroke-linecap="round"/><path d="M3 4l18 8" stroke="#29B6F6" stroke-width="3" stroke-linecap="round"/><path d="M10 6.5L7 1M10 6.5L13 1" stroke="#E91E63" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <span>Vid&eacute;os Actu</span>
+        <span class="vw-badge vw-badge-yt">YouTube</span>
+      </div>
+      <div id="vl-yt"><div class="vw-sk" style="aspect-ratio:16/9;border-radius:10px"></div></div>
+
+      <!-- TRENDS MODULE -->
+    </div>
+  </section>
+
+  <!-- EMERALD SEPARATOR -->
+  <div class="em-sep"><div class="em-sep-line"></div></div>
+
+  <section class="breaking" id="breaking">
+    <div class="breaking-header">
+      <h2>Actualit&eacute;s Chaudes</h2>
+      <span class="breaking-fire"><span class="bk-dot"></span> En direct</span>
+      <span class="breaking-refresh" id="bk-refresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0114.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0020.49 15"/></svg>
+        <span id="bk-timer"></span>
+      </span>
+    </div>
+    <div class="bk-scroll" id="bk-scroll">
+      <div class="bk-sk"></div><div class="bk-sk"></div><div class="bk-sk"></div><div class="bk-sk"></div>
+    </div>
+  </section>
+
+  <div class="em-sep"><div class="em-sep-line"></div></div>
+
+  <section class="ns" id="news">
+    <div class="nh">
+      <h2>Actualites</h2>
+      <div class="tabs" id="tabs">
+        <button class="tab active" onclick="sTab('mali',this)">Mali</button>
+        <button class="tab" onclick="sTab('burkina',this)">Burkina Faso</button>
+        <button class="tab" onclick="sTab('niger',this)">Niger</button>
+        <button class="tab" onclick="sTab('franco',this)">Francophone</button>
+        <button class="tab" onclick="sTab('iran',this)">&#127470;&#127479; Iran</button>
+      </div>
+    </div>
+    <div class="ng" id="ng"></div>
+  </section>
+
+
+  <div class="em-sep"><div class="em-sep-line"></div></div>
+
+  <section class="dl-section" id="download">
+    <h2>Telecharger TerranoWeb</h2>
+    <p class="dl-sub">Disponible sur Windows et Android</p>
+    <div class="dl-cards">
+      <div class="dl-card">
+        <div class="dl-icon"><img src="/windows-logo.svg" alt="Windows" style="height:48px;width:auto"></div>
+        <h3>Windows</h3>
+        <div class="dl-size">115 Mo &mdash; v1.0.3</div>
+        <a href="/downloads/TerranoWeb-Setup-1.0.3.exe" download class="dl-btn dl-btn-win">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Telecharger .exe
+        </a>
+        <div class="dl-req">Windows 10/11 &mdash; 64 bits</div>
+      </div>
+      <div class="dl-card">
+        <div class="dl-icon"><img src="/android-logo.svg" alt="Android" style="height:48px;width:auto"></div>
+        <h3>Android</h3>
+        <div class="dl-size">1.6 Mo &mdash; v2.0.0</div>
+        <a href="/downloads/TerranoWeb-2.0.0.apk" download class="dl-btn dl-btn-apk">
+          <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Telecharger .apk
+        </a>
+        <div class="dl-req">Android 8.0+</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <div class="fl">
+      <a href="#news">Actualites</a>
+      <a href="mailto:contact@terranoweb.win">Contact</a>
+    </div>
+    <p style="display:flex;align-items:center;justify-content:center;gap:8px"><img src="/logo.png?v=2" alt="" style="height:20px;width:auto;opacity:.6"> &copy; 2026 TerranoWeb. Tous droits reserves.</p>
+  </footer>
+
+  <script>
+  const TABS=['mali','burkina','niger','franco','iran'];
+  let U=null,CT=TABS[Math.floor(Math.random()*TABS.length)],AM='login',AP=false;const NC={},CTL=2*60*1000;
+  let BKC=null; const BK_REFRESH=2*60*1000; const NEWS_REFRESH=2*60*1000;
+  function E(s){return s?s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'):''}
+  function T(iso){const ms=Date.now()-new Date(iso).getTime(),m=Math.floor(ms/60000);if(m<1)return'A l\'instant';if(m<60)return`Il y a ${m} min`;const h=Math.floor(m/60);if(h<24)return`Il y a ${h}h`;const d=Math.floor(h/24);if(d<7)return`Il y a ${d}j`;return new Date(iso).toLocaleDateString('fr-FR',{day:'2-digit',month:'short'})}
+  async function F(u,m='GET',b=null){const o={method:m,headers:{},credentials:'same-origin'};if(b){o.headers['Content-Type']='application/json';o.body=JSON.stringify(b)}return(await fetch(u,o)).json()}
+
+  // AUTH
+  async function ckAuth(){try{const d=await F('/api/auth/me');if(d.ok)U=d.user}catch{}}
+
+  function rAW(){
+    const w=document.getElementById('aw');
+    if(U){
+      const i=E((U.displayName||U.username).charAt(0).toUpperCase());
+      w.innerHTML=`<button class="auth-user-btn" onclick="tAP()"><div class="av">${i}</div><span>${E(U.email)}</span></button>
+      <div class="auth-panel" id="ap"><div class="aui"><div class="av" style="width:48px;height:48px;font-size:20px;margin:0 auto">${i}</div><div class="em">${E(U.email)}</div><div class="nm">${E(U.displayName)}</div></div><button class="alo" onclick="doLogout()">Se deconnecter</button></div>`;
+    }else{
+      w.innerHTML=`<button class="auth-trigger" onclick="tAP()"><svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Connexion</button>
+      <div class="auth-panel" id="ap">
+        <div id="fl" ${AM==='register'?'style="display:none"':''}>
+          <h3>Connexion</h3><div class="sub">Accedez a votre compte @terranoweb.win</div>
+          <div class="af"><label>Nom d'utilisateur</label><input id="lu" placeholder="utilisateur"></div>
+          <div class="af"><label>Mot de passe</label><input id="lp" type="password" placeholder="Mot de passe"></div>
+          <div class="ae" id="le"></div>
+          <button class="ab" onclick="doLogin()">Se connecter</button>
+          <div class="asw">Pas encore de compte ? <a href="/register">Creer un compte</a></div>
+        </div>
+        <div id="fr" ${AM==='login'?'style="display:none"':''}>
+          <h3>Creer un compte</h3><div class="sub">Obtenez votre adresse @terranoweb.win</div>
+          <div class="af"><label>Nom d'utilisateur</label><input id="ru" placeholder="prenom.nom" oninput="uEP()"><div class="email-prev" id="ep"></div></div>
+          <div class="af"><label>Nom d'affichage</label><input id="rd" placeholder="Votre nom"></div>
+          <div class="af"><label>Mot de passe (min. 6 car.)</label><input id="rp" type="password" placeholder="Mot de passe"></div>
+          <div class="ae" id="re"></div>
+          <button class="ab" onclick="doReg()">Creer le compte</button>
+          <div class="asw">Deja un compte ? <a href="javascript:void(0)" onclick="sL()">Se connecter</a></div>
+        </div>
+      </div>`;
+    }
+  }
+
+  function tAP(){AP=!AP;const p=document.getElementById('ap'),o=document.getElementById('ov');if(p)p.classList.toggle('open',AP);o.classList.toggle('open',AP)}
+  function closeAuth(){AP=false;const p=document.getElementById('ap'),o=document.getElementById('ov');if(p)p.classList.remove('open');o.classList.remove('open')}
+  function sR(){AM='register';document.getElementById('fl').style.display='none';document.getElementById('fr').style.display=''}
+  function sL(){AM='login';document.getElementById('fl').style.display='';document.getElementById('fr').style.display='none'}
+  function uEP(){const u=document.getElementById('ru').value.trim().toLowerCase();document.getElementById('ep').textContent=u?u+'@terranoweb.win':''}
+
+  async function doLogin(){
+    const u=document.getElementById('lu').value,p=document.getElementById('lp').value,e=document.getElementById('le');e.style.display='none';
+    try{const d=await F('/api/auth/login','POST',{username:u,password:p});if(d.ok){U=d.user;closeAuth();rAW();startMailBadge()}else{e.textContent=d.error||'Identifiants invalides';e.style.display='block'}}catch{e.textContent='Erreur de connexion';e.style.display='block'}
+  }
+
+  async function doReg(){
+    const u=document.getElementById('ru').value,n=document.getElementById('rd').value,p=document.getElementById('rp').value,e=document.getElementById('re');e.style.display='none';
+    try{const d=await F('/api/auth/register','POST',{username:u,displayName:n,password:p});if(d.ok){U=d.user;closeAuth();rAW();startMailBadge()}else{e.textContent=d.error||'Erreur';e.style.display='block'}}catch{e.textContent='Erreur serveur';e.style.display='block'}
+  }
+
+  async function doLogout(){await F('/api/auth/logout','POST');U=null;closeAuth();rAW();stopMailBadge()}
+
+  // MAIL BADGE POLLING
+  let _mailPoll=null
+  function startMailBadge(){
+    const link=document.getElementById('navMail')
+    if(!U||!link)return
+    link.style.display='inline-block'
+    pollMailBadge()
+    _mailPoll=setInterval(pollMailBadge,60000)
+  }
+  function stopMailBadge(){
+    const link=document.getElementById('navMail')
+    if(link)link.style.display='none'
+    if(_mailPoll){clearInterval(_mailPoll);_mailPoll=null}
+  }
+  async function pollMailBadge(){
+    try{const d=await F('/api/mail/unread');if(d.ok){const b=document.getElementById('mailBadge');if(d.count>0){b.textContent=d.count>99?'99+':d.count;b.style.display='inline-block'}else{b.style.display='none'}}}catch{}
+  }
+
+  // SEARCH MODE
+  let searchMode='web';
+  function setMode(m,btn){
+    searchMode=m;
+    document.querySelectorAll('.ql-mode').forEach(x=>x.classList.remove('active'));
+    btn.classList.add('active');
+  }
+  function doSearch(ev){ev.preventDefault();const q=document.getElementById('si').value.trim();if(!q)return;if(/^https?:\/\//i.test(q)||(/\.[a-z]{2,}$/i.test(q)&&!/\s/.test(q))){window.open(q.startsWith('http')?q:'https://'+q,'_blank')}else{window.location.href='/search?q='+encodeURIComponent(q)+(searchMode!=='web'?'&mode='+searchMode:'')}}
+
+  // NEWS
+  function sTab(t,b){CT=t;document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));b.classList.add('active');lN(t)}
+
+  async function lN(t){
+    const now=Date.now(),c=NC[t];
+    if(c&&(now-c.ts)<CTL){rN(c.a);return}
+    rSk();
+    try{
+      const endpoint=t==='iran'?'/api/news/iran':'/api/news?tab='+t;
+      const d=await F(endpoint);
+      if(d.ok&&d.articles.length>0){NC[t]={a:d.articles,ts:now};rN(d.articles)}else{rNE()}
+    }catch{c?rN(c.a):rNE()}
+  }
+
+  function shuffle(arr){const s=[...arr];for(let i=s.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[s[i],s[j]]=[s[j],s[i]]}return s}
+
+  function rN(a){
+    const g=document.getElementById('ng');
+    if(!a||!a.length){rNE();return}
+    const items=shuffle(a);
+    g.innerHTML=items.map(x=>`<a class="nc" href="${E(x.url)}" target="_blank" rel="noopener">${x.image?`<img src="${E(x.image)}" alt="" loading="lazy" onerror="this.style.display='none'">`:''}
+    <div class="ncb"><span class="ncs">${E(x.source)}</span><h3 class="nct">${E(x.title)}</h3>${x.snippet?`<p class="ncx">${E(x.snippet)}</p>`:''}<span class="ncd">${T(x.pubDate)}</span></div></a>`).join('')
+  }
+
+  function rSk(){document.getElementById('ng').innerHTML=Array(6).fill(`<div class="nc sk"><div style="width:100%;height:160px" class="skb"></div><div class="ncb"><div class="skl s"></div><div class="skl"></div><div class="skl m"></div><div class="skl s"></div></div></div>`).join('')}
+  function rNE(){document.getElementById('ng').innerHTML=`<div class="ne"><svg width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V9a2 2 0 012-2h2a2 2 0 012 2v9a2 2 0 01-2 2h-2z"/></svg><p>Aucune actualite disponible pour le moment.</p><p style="font-size:12px">Les actualites seront disponibles dans quelques instants.</p></div>`}
+
+  // Enter key support on auth fields
+  document.addEventListener('keydown',e=>{if(e.key==='Enter'){const id=document.activeElement?.id;if(id==='lu'||id==='lp')doLogin();if(id==='rp')doReg()}});
+
+  // RT FRANCE LIVE PLAYER (via proxy anti-géoblocage)
+  const RT_STREAM_DIRECT='https://rt-fra.rttv.com/dvr/rtfrance/playlist.m3u8';
+  const RT_STREAM='/api/proxy?url='+encodeURIComponent(RT_STREAM_DIRECT);
+  let rtMuted=true;
+
+  function initRTPlayer(){
+    const video=document.getElementById('rt-video');
+    const errOverlay=document.getElementById('rt-error-overlay');
+    if(!video)return;
+    video.muted=true;
+    if(errOverlay)errOverlay.style.display='none';
+
+    // Vérifier que HLS.js est chargé
+    if(typeof Hls==='undefined'){
+      console.error('[RT] HLS.js non chargé');
+      if(errOverlay)errOverlay.style.display='flex';
+      return;
+    }
+
+    try{
+      if(Hls.isSupported()){
+        let retryCount=0;
+        function tryStream(url,label){
+          const hls=new Hls({enableWorker:true,lowLatencyMode:true,manifestLoadingTimeOut:15000,levelLoadingTimeOut:15000});
+          hls.loadSource(url);
+          hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED,()=>{
+            video.play().catch(e=>console.warn('[RT] Autoplay blocked:',e));
+          });
+          hls.on(Hls.Events.ERROR,(_,data)=>{
+            if(data.fatal){
+              console.warn('[RT] '+label+' HLS error:',data.type);
+              hls.destroy();
+              retryCount++;
+              if(retryCount===1){
+                // Fallback : essayer en direct (fonctionne si pas géo-bloqué)
+                console.log('[RT] Tentative directe...');
+                tryStream(RT_STREAM_DIRECT,'Direct');
+              }else{
+                console.error('[RT] Proxy et direct échoués');
+                if(errOverlay)errOverlay.style.display='flex';
+              }
+            }
+          });
+        }
+        tryStream(RT_STREAM,'Proxy');
+      }else if(video.canPlayType('application/vnd.apple.mpegurl')){
+        video.src=RT_STREAM;
+        video.addEventListener('loadedmetadata',()=>{video.play().catch(()=>{})});
+        video.addEventListener('error',()=>{
+          if(errOverlay)errOverlay.style.display='flex';
+        });
+      }else{
+        console.error('[RT] HLS non supporté');
+        if(errOverlay)errOverlay.style.display='flex';
+      }
+    }catch(e){
+      console.error('[RT] Erreur initialisation:',e);
+      if(errOverlay)errOverlay.style.display='flex';
+    }
+  }
+
+  function toggleRTMute(){
+    const video=document.getElementById('rt-video');
+    const btn=document.getElementById('rt-unmute');
+    if(!video||!btn)return;
+    rtMuted=!rtMuted;
+    video.muted=rtMuted;
+    if(rtMuted){
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg><span>Son coup\u00e9</span>';
+    }else{
+      btn.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 5L6 9H2v6h4l5 4V5z"/><path d="M19.07 4.93a10 10 0 010 14.14"/><path d="M15.54 8.46a5 5 0 010 7.07"/></svg><span>Son activ\u00e9</span>';
+    }
+  }
+
+  // VIDEOS
+  const VC={rtfr:null,random:null},VCT=10*60*1000;
+  const playSVG='<svg width="22" height="22" fill="white" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21"/></svg>';
+
+  async function lV(){
+    try{
+      const now=Date.now();
+      // YouTube random
+      if(!VC.random||(now-VC.random.ts)>VCT){
+        const d=await F('/api/videos?side=random');
+        if(d.ok&&d.videos.length>0){VC.random={v:d.videos,ts:now}}
+      }
+      if(VC.random&&VC.random.v.length>0) rVR(VC.random.v);
+    }catch(err){console.error('Video load error:',err)}
+  }
+
+  // ── Video Slider state ──
+  let vsIdx=0, vsVids=[], vsAutoTimer=null;
+
+  function rVR(vids){
+    const el=document.getElementById('vl-yt');if(!el||!vids.length)return;
+    const idx=Math.floor(Date.now()/300000)%vids.length;
+    vsVids=[vids[idx],...vids.filter((_,i)=>i!==idx)].slice(0,8);
+    vsIdx=0;
+
+    // Build slider HTML
+    el.innerHTML=`<div class="vs-wrap">
+      <div class="vs-viewport">
+        <div class="vs-track" id="vs-track">${vsVids.map((v,i)=>`<div class="vs-slide" data-i="${i}" data-vid="${E(v.videoId)}">
+          <img src="${E(v.thumbnail)}" alt="" loading="lazy">
+          <div class="vs-overlay">
+            <div class="vs-src">${E(v.source)}</div>
+            <div class="vs-t">${E(v.title)}</div>
+            <div class="vs-d">${T(v.pubDate)}</div>
+          </div>
+        </div>`).join('')}</div>
+        <button class="vs-arr vs-arr-l" onclick="vsNav(-1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>
+        <button class="vs-arr vs-arr-r" onclick="vsNav(1)"><svg fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></button>
+      </div>
+      <div class="vs-dots" id="vs-dots">${vsVids.map((_,i)=>`<button class="vs-dot${i===0?' active':''}" onclick="vsGo(${i})"></button>`).join('')}</div>
+      <a class="vs-yt-link" href="https://www.youtube.com/results?search_query=actualit%C3%A9s+afrique" target="_blank" rel="noopener">
+        <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.6 3.2c-.3-.4-.8-.8-2.5-.8H6.9c-1.7 0-2.2.4-2.5.8C4.1 3.6 3.5 5 3.5 12s.6 8.4.9 8.8c.3.4.8.8 2.5.8h10.2c1.7 0 2.2-.4 2.5-.8.3-.4.9-1.8.9-8.8s-.6-8.4-.9-8.8zM10 15.5v-7l6 3.5-6 3.5z"/></svg>
+        Voir plus sur YouTube
+      </a>
+    </div>`;
+
+    // Autoplay first slide muted
+    vsPlaySlide(0);
+    vsStartAuto();
+  }
+
+  function vsPlaySlide(i){
+    const track=document.getElementById('vs-track');if(!track)return;
+    // Remove any existing iframe
+    track.querySelectorAll('iframe').forEach(f=>f.remove());
+    track.querySelectorAll('img[style*="display:none"]').forEach(img=>{img.style.display=''});
+    // Move track
+    track.style.transform=`translateX(-${i*100}%)`;
+    // Update dots
+    document.querySelectorAll('#vs-dots .vs-dot').forEach((d,j)=>{
+      d.classList.toggle('active',j===i);
+    });
+    vsIdx=i;
+    // Insert muted autoplay iframe on active slide
+    const slide=track.children[i];
+    if(slide&&!slide.querySelector('iframe')){
+      const vid=slide.dataset.vid;
+      const ifr=document.createElement('iframe');
+      ifr.src=`https://www.youtube.com/embed/${vid}?autoplay=1&mute=1&controls=0&modestbranding=1&rel=0&showinfo=0&loop=1&playlist=${vid}`;
+      ifr.allow='autoplay; encrypted-media';
+      ifr.allowFullscreen=true;
+      ifr.style.cssText='position:absolute;top:0;left:0;width:100%;height:100%;border:none;z-index:1;pointer-events:none';
+      slide.querySelector('img').style.display='none';
+      slide.appendChild(ifr);
+    }
+  }
+
+  function vsNav(dir){
+    vsStopAuto();
+    const next=(vsIdx+dir+vsVids.length)%vsVids.length;
+    vsPlaySlide(next);
+    vsStartAuto();
+  }
+
+  function vsGo(i){
+    vsStopAuto();
+    vsPlaySlide(i);
+    vsStartAuto();
+  }
+
+  function vsStartAuto(){
+    vsStopAuto();
+    vsAutoTimer=setInterval(()=>{
+      const next=(vsIdx+1)%vsVids.length;
+      vsPlaySlide(next);
+    },15000);
+  }
+
+  function vsStopAuto(){
+    if(vsAutoTimer){clearInterval(vsAutoTimer);vsAutoTimer=null}
+  }
+
+
+  // BREAKING NEWS
+  async function lBK(silent){
+    const ref=document.getElementById('bk-refresh');
+    if(!silent&&ref) ref.classList.add('loading');
+    try{
+      const d=await F('/api/breaking');
+      if(d.ok&&d.articles.length>0){BKC=d.articles;rBK(d.articles)}
+    }catch(err){console.error('Breaking load error:',err)}
+    finally{if(ref)ref.classList.remove('loading')}
+  }
+
+  function rBK(articles){
+    const el=document.getElementById('bk-scroll');if(!el)return;
+    el.innerHTML=articles.map(a=>`<a class="bk-card" href="${E(a.url)}" target="_blank" rel="noopener">
+      ${a.image?`<img src="${E(a.image)}" alt="" loading="lazy" onerror="this.style.display='none'">`:'<div style="height:130px;background:var(--border);display:flex;align-items:center;justify-content:center;color:var(--text-muted);font-size:24px">&#128240;</div>'}
+      <div class="bk-body"><span class="bk-src">${E(a.source)}</span><div class="bk-title">${E(a.title)}</div><span class="bk-time">${T(a.pubDate)}</span></div>
+    </a>`).join('')
+  }
+
+  // AUTO-REFRESH: news + breaking every 2 minutes
+  let bkCountdown=BK_REFRESH/1000;
+  function startAutoRefresh(){
+    // Breaking news countdown timer
+    setInterval(()=>{
+      bkCountdown--;
+      const tm=document.getElementById('bk-timer');
+      if(tm){
+        if(bkCountdown<=0){
+          tm.textContent='Actualisation...';
+        }else{
+          const m=Math.floor(bkCountdown/60),s=bkCountdown%60;
+          tm.textContent=m+':'+(s<10?'0':'')+s;
+        }
+      }
+    },1000);
+
+    // Refresh breaking news + slider every 2 min
+    setInterval(()=>{
+      bkCountdown=BK_REFRESH/1000;
+      lBK(true);
+      lSlider();
+    },BK_REFRESH);
+
+    // Refresh current news tab every 2 min (force bypass client cache)
+    setInterval(()=>{
+      NC[CT]=null; // Invalidate client cache
+      lN(CT);
+    },NEWS_REFRESH);
+  }
+
+  // NEWS IMAGE SLIDER
+  let sliderIdx=0,sliderLen=0,sliderTimer=null,sliderData=[];
+
+  async function lSlider(){
+    try{
+      const d=await F('/api/breaking');
+      if(!d.ok||!d.articles||d.articles.length===0) return;
+      // Filter articles that have images
+      sliderData=d.articles.filter(a=>a.image).slice(0,8);
+      if(sliderData.length===0) return;
+      sliderLen=sliderData.length;
+      rSlider();
+      startSlider();
+    }catch(err){console.error('Slider load error:',err)}
+  }
+
+  function rSlider(){
+    const track=document.getElementById('slider-track');
+    const nav=document.getElementById('slider-nav');
+    if(!track||!nav||sliderData.length===0) return;
+
+    track.innerHTML=sliderData.map((a,i)=>`<div class="slider-slide${i===0?' active':''}">
+      <a href="${E(a.url)}" target="_blank" rel="noopener" style="display:block;width:100%;height:100%">
+        <img src="${E(a.image)}" alt="" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%221200%22 height=%22400%22><rect fill=%22%231e293b%22 width=%221200%22 height=%22400%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%2394a3b8%22 font-size=%2224%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22>TerranoWeb</text></svg>'">
+        <div class="slider-overlay"></div>
+        <div class="slider-content">
+          <div class="slider-src">${E(a.source)}</div>
+          <div class="slider-title">${E(a.title)}</div>
+          <div class="slider-time">${T(a.pubDate)}</div>
+        </div>
+      </a>
+    </div>`).join('');
+
+    nav.innerHTML=sliderData.map((_,i)=>`<button class="slider-dot${i===0?' active':''}" onclick="goSlide(${i})"></button>`).join('');
+    sliderIdx=0;
+    resetProgress();
+  }
+
+  function goSlide(i){
+    sliderIdx=i;
+    if(sliderIdx>=sliderLen) sliderIdx=0;
+    if(sliderIdx<0) sliderIdx=sliderLen-1;
+    const track=document.getElementById('slider-track');
+    if(track) track.style.transform='translateX(-'+sliderIdx*100+'%)';
+    document.querySelectorAll('.slider-dot').forEach((d,j)=>d.classList.toggle('active',j===sliderIdx));
+    document.querySelectorAll('.slider-slide').forEach((s,j)=>s.classList.toggle('active',j===sliderIdx));
+    resetProgress();
+    resetSliderTimer();
+  }
+
+  function slideNav(dir){ goSlide(sliderIdx+dir); }
+
+  function startSlider(){
+    sliderTimer=setInterval(()=>goSlide(sliderIdx+1),6000);
+  }
+
+  function resetSliderTimer(){
+    if(sliderTimer) clearInterval(sliderTimer);
+    sliderTimer=setInterval(()=>goSlide(sliderIdx+1),6000);
+  }
+
+  function resetProgress(){
+    const bar=document.getElementById('slider-progress');
+    if(!bar) return;
+    bar.classList.remove('active');
+    void bar.offsetWidth; // force reflow
+    bar.classList.add('active');
+  }
+
+  // INIT
+  document.addEventListener('DOMContentLoaded',async()=>{
+    // Highlight random initial tab
+    document.querySelectorAll('.tab').forEach(b=>{const m=b.getAttribute('onclick')||'';b.classList.toggle('active',m.includes("'"+CT+"'"))});
+    await ckAuth();rAW();lN(CT);initRTPlayer();lV();lBK(false);lSlider();
+    startAutoRefresh();startMailBadge();
+    // Handle /register path or #auth-signup hash — open auth panel in register mode
+    if((window.location.pathname==='/register'||window.location.hash==='#auth-signup')&&!U){sR();tAP();history.replaceState(null,'','/');}
+    // Register PWA Service Worker
+    if('serviceWorker' in navigator){navigator.serviceWorker.register('/sw.js').catch(()=>{})}
+  });
+  </script>
+</body>
+</html>

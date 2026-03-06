@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Messagerie — TerranoWeb</title>
+<link rel="icon" href="/favicon.ico">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#06080f;--bg2:#0c1220;--bg3:#141c2e;--bg4:#1e293b;--bg5:#2a3650;
+  --emerald:#10b981;--emerald-d:#059669;--emerald-l:#34d399;
+  --emerald-glow:rgba(16,185,129,.08);--emerald-glow2:rgba(16,185,129,.15);
+  --text:#f1f5f9;--text2:#94a3b8;--text3:#64748b;--text4:#475569;
+  --red:#ef4444;--yellow:#fbbf24;--blue:#3b82f6;--purple:#8b5cf6;
+  --glass:rgba(12,18,32,.85);--glass2:rgba(20,28,46,.7);
+  --border:rgba(148,163,184,.08);--border2:rgba(148,163,184,.15);
+  --radius:14px;--radius-sm:10px;--radius-xs:8px;
+  --shadow:0 8px 32px rgba(0,0,0,.5);--shadow-lg:0 20px 60px rgba(0,0,0,.6);
+  --transition:cubic-bezier(.4,0,.2,1);
+}
+html,body{height:100%;font-family:'Inter','Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;-webkit-font-smoothing:antialiased}
+a{color:var(--emerald);text-decoration:none}
+::selection{background:var(--emerald);color:#fff}
+
+/* ============= LAYOUT ============= */
+.app{display:flex;height:100vh;width:100vw;position:relative}
+
+/* --- Sidebar --- */
+.sidebar{
+  width:270px;min-width:270px;background:var(--bg2);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:20;transition:transform .35s var(--transition);
+  position:relative;
+}
+.sidebar::after{
+  content:'';position:absolute;top:0;right:0;bottom:0;width:1px;
+  background:linear-gradient(to bottom,var(--emerald-glow),transparent 30%,transparent 70%,var(--emerald-glow));
+}
+.sb-header{
+  padding:20px 24px;display:flex;align-items:center;gap:12px;
+  background:linear-gradient(135deg,rgba(16,185,129,.06),transparent);
+}
+.sb-logo-icon{
+  width:38px;height:38px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--emerald),var(--emerald-d));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 4px 16px rgba(16,185,129,.25);
+}
+.sb-logo-icon svg{width:20px;height:20px;color:#fff}
+.sb-logo{display:flex;flex-direction:column}
+.sb-logo-name{font-size:15px;font-weight:700;letter-spacing:-.3px}
+.sb-logo-sub{font-size:11px;color:var(--text3);font-weight:400;letter-spacing:.5px}
+
+.btn-compose{
+  margin:12px 16px 8px;padding:13px 20px;border:none;border-radius:var(--radius);cursor:pointer;
+  background:linear-gradient(135deg,var(--emerald),#0d9488);color:#fff;
+  font-size:14px;font-weight:600;display:flex;align-items:center;gap:10px;justify-content:center;
+  transition:all .25s var(--transition);position:relative;overflow:hidden;
+  box-shadow:0 4px 20px rgba(16,185,129,.2);letter-spacing:.2px;
+}
+.btn-compose::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.15),transparent);
+  opacity:0;transition:opacity .25s;
+}
+.btn-compose:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(16,185,129,.35)}
+.btn-compose:hover::before{opacity:1}
+.btn-compose:active{transform:translateY(0)}
+.btn-compose svg{width:18px;height:18px}
+
+.sb-divider{height:1px;background:var(--border);margin:8px 20px}
+
+.sb-folders{flex:1;overflow-y:auto;padding:4px 0}
+.sb-section{padding:8px 24px 6px;font-size:10px;font-weight:600;color:var(--text4);text-transform:uppercase;letter-spacing:1.2px}
+.sb-folder{
+  display:flex;align-items:center;gap:12px;padding:11px 24px;cursor:pointer;
+  color:var(--text2);font-size:13px;font-weight:500;
+  transition:all .2s var(--transition);border-left:3px solid transparent;
+  position:relative;
+}
+.sb-folder:hover{background:var(--emerald-glow);color:var(--text)}
+.sb-folder.active{
+  color:var(--emerald);background:var(--emerald-glow2);
+  border-left-color:var(--emerald);font-weight:600;
+}
+.sb-folder svg{width:18px;height:18px;flex-shrink:0;opacity:.7}
+.sb-folder.active svg{opacity:1}
+.sb-folder .badge{
+  margin-left:auto;background:var(--emerald);color:#fff;font-size:10px;font-weight:700;
+  padding:2px 8px;border-radius:10px;min-width:22px;text-align:center;
+  box-shadow:0 2px 8px rgba(16,185,129,.3);
+}
+.sb-folder .folder-name{flex:1}
+
+/* User card */
+.sb-user{
+  margin:12px 16px;padding:14px 16px;border-radius:var(--radius);
+  background:var(--bg3);border:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;
+  transition:border-color .2s;
+}
+.sb-user:hover{border-color:var(--border2)}
+.sb-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(135deg,var(--emerald),var(--blue));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff;flex-shrink:0;
+  box-shadow:0 2px 8px rgba(16,185,129,.2);
+}
+.sb-user-info{overflow:hidden;flex:1}
+.sb-user-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sb-user-email{font-size:11px;color:var(--text3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.btn-logout{
+  padding:6px;border:none;background:none;cursor:pointer;color:var(--text3);
+  border-radius:var(--radius-xs);transition:all .2s;
+}
+.btn-logout:hover{background:rgba(239,68,68,.1);color:var(--red)}
+.btn-logout svg{width:18px;height:18px}
+
+/* --- Message List --- */
+.msg-list{
+  flex:1;min-width:0;display:flex;flex-direction:column;
+  border-right:1px solid var(--border);background:var(--bg);
+}
+.ml-header{
+  padding:18px 24px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:16px;background:var(--bg2);
+}
+.ml-header-left{flex:1;min-width:0}
+.ml-title{font-size:18px;font-weight:700;letter-spacing:-.3px}
+.ml-count{font-size:11px;color:var(--text3);margin-top:2px}
+.ml-search{
+  display:flex;align-items:center;gap:8px;padding:0 14px;border-radius:var(--radius-sm);
+  background:var(--bg3);border:1px solid var(--border);height:38px;
+  transition:border-color .25s,box-shadow .25s;
+}
+.ml-search:focus-within{border-color:var(--emerald);box-shadow:0 0 0 3px var(--emerald-glow)}
+.ml-search input{
+  background:none;border:none;color:var(--text);font-size:13px;width:180px;outline:none;
+}
+.ml-search input::placeholder{color:var(--text4)}
+.ml-search svg{width:16px;height:16px;color:var(--text3);flex-shrink:0}
+.ml-body{flex:1;overflow-y:auto;scroll-behavior:smooth}
+.ml-empty{padding:80px 24px;text-align:center;color:var(--text3);font-size:14px}
+.ml-empty svg{width:56px;height:56px;margin-bottom:16px;opacity:.3}
+.ml-empty p{margin-top:8px;font-size:13px;color:var(--text4)}
+
+/* Message item */
+.msg-item{
+  display:flex;align-items:flex-start;gap:14px;padding:16px 24px;cursor:pointer;
+  border-bottom:1px solid var(--border);transition:all .2s var(--transition);
+  position:relative;
+}
+.msg-item:hover{background:rgba(16,185,129,.04)}
+.msg-item.active{background:rgba(16,185,129,.08)}
+.msg-item.active::after{
+  content:'';position:absolute;right:0;top:12px;bottom:12px;width:3px;
+  background:var(--emerald);border-radius:3px 0 0 3px;
+}
+.msg-item.unread .mi-from{color:var(--text);font-weight:700}
+.msg-item.unread .mi-subject{color:var(--text);font-weight:600}
+.msg-item.unread::before{
+  content:'';position:absolute;left:10px;top:50%;transform:translateY(-50%);
+  width:8px;height:8px;border-radius:50%;background:var(--emerald);
+  box-shadow:0 0 8px rgba(16,185,129,.4);
+}
+.mi-avatar{
+  width:42px;height:42px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--bg4),var(--bg5));
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px;
+  color:var(--emerald-l);flex-shrink:0;
+  transition:transform .2s;
+}
+.msg-item:hover .mi-avatar{transform:scale(1.05)}
+.mi-content{flex:1;min-width:0}
+.mi-top{display:flex;align-items:center;gap:8px}
+.mi-from{font-size:13px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2);font-weight:500;transition:color .2s}
+.mi-date{font-size:11px;color:var(--text4);white-space:nowrap;font-weight:500}
+.mi-subject{font-size:13px;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2);transition:color .2s}
+.mi-preview{font-size:12px;color:var(--text4);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.4}
+.mi-bottom{display:flex;align-items:center;gap:6px;margin-top:6px}
+.mi-tag{
+  font-size:10px;font-weight:600;padding:2px 8px;border-radius:6px;
+  letter-spacing:.3px;
+}
+.mi-tag.external{background:rgba(139,92,246,.12);color:var(--purple)}
+.mi-tag.attachment{background:rgba(59,130,246,.12);color:var(--blue)}
+.mi-star{color:var(--text4);cursor:pointer;transition:all .2s;display:flex;align-items:center}
+.mi-star:hover{color:var(--yellow);transform:scale(1.15)}
+.mi-star.starred{color:var(--yellow)}
+.mi-star svg{width:14px;height:14px}
+
+/* Pagination */
+.ml-pagination{
+  display:flex;align-items:center;justify-content:center;gap:8px;padding:12px;
+  border-top:1px solid var(--border);background:var(--bg2);
+}
+.ml-pagination button{
+  padding:7px 14px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg3);
+  color:var(--text2);cursor:pointer;font-size:12px;font-weight:500;transition:all .2s var(--transition);
+}
+.ml-pagination button:hover:not(:disabled){background:var(--emerald);color:#fff;border-color:var(--emerald);transform:translateY(-1px)}
+.ml-pagination button:disabled{opacity:.3;cursor:default}
+.ml-pagination span{font-size:12px;color:var(--text3);font-weight:500}
+
+/* --- Reader Pane --- */
+.reader{
+  flex:1.2;min-width:0;display:flex;flex-direction:column;background:var(--bg);
+  position:relative;
+}
+.rd-empty{flex:1;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--text3)}
+.rd-empty-inner{display:flex;flex-direction:column;align-items:center;gap:16px}
+.rd-empty svg{width:72px;height:72px;opacity:.15}
+.rd-empty p{font-size:14px;color:var(--text4)}
+.rd-empty .rd-tip{font-size:12px;color:var(--text4);opacity:.6;margin-top:4px}
+
+.rd-header{
+  padding:24px 28px;border-bottom:1px solid var(--border);background:var(--bg2);
+  position:relative;
+}
+.rd-header::after{
+  content:'';position:absolute;bottom:0;left:28px;right:28px;height:1px;
+  background:linear-gradient(to right,var(--emerald-glow),transparent);
+}
+.rd-subject{font-size:22px;font-weight:700;margin-bottom:16px;letter-spacing:-.3px;line-height:1.3}
+.rd-meta{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.rd-avatar{
+  width:44px;height:44px;border-radius:var(--radius-sm);
+  background:linear-gradient(135deg,var(--emerald),var(--blue));
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:17px;color:#fff;
+  box-shadow:0 4px 12px rgba(16,185,129,.2);
+}
+.rd-from-info{flex:1;min-width:0}
+.rd-from{font-size:15px;font-weight:600}
+.rd-email{font-size:12px;color:var(--text3);margin-top:2px}
+.rd-date{font-size:12px;color:var(--text3);font-weight:500;background:var(--bg3);padding:4px 10px;border-radius:6px}
+
+.rd-body{
+  flex:1;overflow-y:auto;padding:28px;font-size:14px;line-height:1.8;color:var(--text);
+  white-space:pre-wrap;scroll-behavior:smooth;
+}
+.rd-attachments{
+  padding:16px 28px;border-top:1px solid var(--border);background:var(--bg2);
+}
+.rd-attachments h4{font-size:12px;color:var(--text3);margin-bottom:10px;display:flex;align-items:center;gap:6px;text-transform:uppercase;letter-spacing:.8px;font-weight:600}
+.rd-att-list{display:flex;flex-wrap:wrap;gap:8px}
+.rd-att-item{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:var(--radius-sm);
+  background:var(--bg3);border:1px solid var(--border);cursor:pointer;
+  transition:all .2s var(--transition);font-size:12px;font-weight:500;
+}
+.rd-att-item:hover{border-color:var(--emerald);background:var(--emerald-glow);transform:translateY(-1px)}
+.rd-att-item svg{width:16px;height:16px;color:var(--emerald);flex-shrink:0}
+.rd-att-size{color:var(--text4);font-weight:400}
+
+.rd-actions{
+  display:flex;gap:8px;padding:16px 28px;border-top:1px solid var(--border);background:var(--bg2);
+}
+.rd-btn{
+  padding:10px 18px;border:1px solid var(--border);border-radius:var(--radius-xs);background:var(--bg3);
+  color:var(--text);cursor:pointer;font-size:13px;font-weight:500;display:flex;align-items:center;gap:7px;
+  transition:all .2s var(--transition);
+}
+.rd-btn:hover{border-color:var(--emerald);background:var(--emerald-glow);color:var(--emerald);transform:translateY(-1px)}
+.rd-btn.primary{
+  background:linear-gradient(135deg,var(--emerald),var(--emerald-d));color:#fff;border-color:transparent;
+  box-shadow:0 2px 12px rgba(16,185,129,.2);
+}
+.rd-btn.primary:hover{box-shadow:0 4px 20px rgba(16,185,129,.35);transform:translateY(-2px)}
+.rd-btn.danger:hover{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08)}
+.rd-btn svg{width:16px;height:16px}
+
+/* ============= COMPOSE MODAL ============= */
+.compose-overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);
+  z-index:100;display:none;align-items:flex-end;justify-content:center;
+  opacity:0;transition:opacity .3s var(--transition);
+}
+.compose-overlay.show{display:flex;opacity:1}
+.compose-box{
+  width:min(640px,100vw);background:var(--bg2);border-radius:20px 20px 0 0;
+  border:1px solid var(--border2);border-bottom:none;box-shadow:var(--shadow-lg);
+  display:flex;flex-direction:column;max-height:85vh;
+  animation:slideUp .4s var(--transition);
+}
+@keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+.cp-header{
+  display:flex;align-items:center;padding:18px 24px;border-bottom:1px solid var(--border);
+  background:linear-gradient(135deg,var(--emerald),#0d9488);border-radius:20px 20px 0 0;
+  position:relative;overflow:hidden;
+}
+.cp-header::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.08),transparent);
+}
+.cp-title{font-size:16px;font-weight:600;color:#fff;flex:1;position:relative}
+.cp-close{
+  width:34px;height:34px;border:none;border-radius:var(--radius-xs);background:rgba(255,255,255,.12);
+  color:#fff;cursor:pointer;font-size:20px;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;position:relative;
+}
+.cp-close:hover{background:rgba(255,255,255,.25);transform:scale(1.05)}
+.cp-fields{padding:16px 24px 8px;display:flex;flex-direction:column;gap:4px}
+.cp-field{
+  display:flex;align-items:center;gap:10px;
+  border-bottom:1px solid var(--border);padding:10px 0;
+}
+.cp-field label{font-size:12px;color:var(--text4);width:36px;font-weight:600;letter-spacing:.3px}
+.cp-field input{
+  flex:1;background:none;border:none;color:var(--text);font-size:14px;outline:none;padding:2px 0;
+  font-weight:500;
+}
+.cp-field input::placeholder{color:var(--text4);font-weight:400}
+.cp-hint{font-size:11px;color:var(--text4);padding:2px 0 4px 46px;opacity:.7}
+.cp-autocomplete{
+  position:absolute;left:0;right:0;top:100%;background:var(--bg3);border:1px solid var(--border2);
+  border-radius:var(--radius-sm);box-shadow:var(--shadow-lg);z-index:10;max-height:180px;overflow-y:auto;
+}
+.cp-ac-item{
+  padding:10px 16px;cursor:pointer;font-size:13px;transition:all .15s;
+  display:flex;align-items:center;gap:10px;
+}
+.cp-ac-item:hover{background:var(--emerald-glow2)}
+.cp-ac-avatar{
+  width:30px;height:30px;border-radius:8px;background:var(--bg4);
+  display:flex;align-items:center;justify-content:center;font-weight:600;font-size:12px;color:var(--emerald-l);
+}
+.cp-ac-info{flex:1;min-width:0}
+.cp-ac-name{font-weight:600;font-size:13px}
+.cp-ac-email{color:var(--text3);font-size:11px;margin-top:1px}
+.cp-to-wrap{position:relative;flex:1}
+.cp-body{flex:1;padding:0 24px;min-height:200px}
+.cp-body textarea{
+  width:100%;height:100%;min-height:200px;background:none;border:none;color:var(--text);
+  font-size:14px;line-height:1.7;resize:none;outline:none;font-family:inherit;
+}
+.cp-body textarea::placeholder{color:var(--text4)}
+.cp-footer{
+  display:flex;align-items:center;gap:10px;padding:14px 24px;border-top:1px solid var(--border);
+}
+.cp-send{
+  padding:11px 28px;border:none;border-radius:var(--radius-sm);cursor:pointer;
+  background:linear-gradient(135deg,var(--emerald),#0d9488);color:#fff;
+  font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px;
+  transition:all .25s var(--transition);
+  box-shadow:0 4px 16px rgba(16,185,129,.2);letter-spacing:.2px;
+}
+.cp-send:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(16,185,129,.35)}
+.cp-send:disabled{opacity:.5;cursor:default;transform:none;box-shadow:none}
+.cp-draft{
+  padding:11px 20px;border:1px solid var(--border);border-radius:var(--radius-sm);background:none;
+  color:var(--text2);cursor:pointer;font-size:13px;font-weight:500;transition:all .2s;
+}
+.cp-draft:hover{border-color:var(--emerald);color:var(--emerald);background:var(--emerald-glow)}
+.cp-attach-btn{
+  width:38px;height:38px;border:none;border-radius:var(--radius-xs);background:var(--bg3);
+  color:var(--text3);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;flex-shrink:0;
+}
+.cp-attach-btn:hover{background:var(--emerald-glow);color:var(--emerald)}
+.cp-attachments{
+  max-height:140px;overflow-y:auto;padding:0 24px;
+  display:flex;flex-direction:column;gap:4px;
+}
+.cp-attachments:empty{display:none}
+.cp-att-item{
+  display:flex;align-items:center;gap:10px;padding:8px 12px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius-xs);
+  font-size:12px;color:var(--text);animation:fadeIn .2s;
+}
+.cp-att-icon{
+  width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:700;flex-shrink:0;color:#fff;
+}
+.cp-att-icon.img{background:linear-gradient(135deg,#8b5cf6,#6d28d9)}
+.cp-att-icon.pdf{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+.cp-att-icon.doc{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.cp-att-icon.zip{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.cp-att-icon.other{background:linear-gradient(135deg,var(--text3),var(--text4))}
+.cp-att-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.cp-att-size{color:var(--text3);font-size:11px;flex-shrink:0}
+.cp-att-remove{
+  width:22px;height:22px;border:none;border-radius:4px;background:none;
+  color:var(--text4);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:16px;transition:all .15s;flex-shrink:0;
+}
+.cp-att-remove:hover{background:rgba(239,68,68,.15);color:#ef4444}
+.cp-att-total{
+  padding:4px 12px;font-size:11px;color:var(--text3);text-align:right;
+}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:translateY(0)}}
+
+/* ============= MOBILE ============= */
+.mobile-header{
+  display:none;padding:14px 16px;background:var(--bg2);border-bottom:1px solid var(--border);
+  align-items:center;gap:12px;
+}
+.btn-hamburger,.btn-back{
+  width:38px;height:38px;border:none;border-radius:var(--radius-xs);background:var(--bg3);
+  color:var(--text);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.btn-hamburger:hover,.btn-back:hover{background:var(--emerald-glow);color:var(--emerald)}
+.mobile-header .mob-title{flex:1;font-size:16px;font-weight:700}
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);backdrop-filter:blur(4px);z-index:19}
+
+/* ============= TOAST ============= */
+.toast{
+  position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);
+  padding:14px 28px;border-radius:var(--radius);font-size:13px;font-weight:600;z-index:200;
+  opacity:0;transition:all .35s var(--transition);pointer-events:none;
+  background:var(--bg3);border:1px solid var(--border2);color:var(--text);
+  box-shadow:var(--shadow-lg);backdrop-filter:blur(12px);
+  display:flex;align-items:center;gap:10px;
+}
+.toast.success{border-color:rgba(16,185,129,.3);background:rgba(16,185,129,.12)}
+.toast.success::before{content:'✓';color:var(--emerald);font-size:16px;font-weight:700}
+.toast.error{border-color:rgba(239,68,68,.3);background:rgba(239,68,68,.12)}
+.toast.error::before{content:'✕';color:var(--red);font-size:16px;font-weight:700}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============= SKELETON ============= */
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;border-radius:8px;animation:shimmer 1.5s infinite}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+
+/* ============= LOGIN WALL ============= */
+.login-wall{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:40px;gap:24px;
+  background:radial-gradient(ellipse at center,rgba(16,185,129,.06),transparent 60%);
+}
+.lw-icon{
+  width:80px;height:80px;border-radius:24px;
+  background:linear-gradient(135deg,var(--emerald),var(--emerald-d));
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:0 8px 32px rgba(16,185,129,.3);
+  animation:float 6s ease-in-out infinite;
+}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.lw-icon svg{width:40px;height:40px;color:#fff}
+.login-wall h2{
+  font-size:32px;font-weight:800;letter-spacing:-.5px;
+  background:linear-gradient(135deg,var(--emerald-l),var(--emerald),var(--blue));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.login-wall p{color:var(--text2);max-width:420px;line-height:1.7;font-size:15px}
+.login-wall p strong{color:var(--emerald-l)}
+
+.lw-form{text-align:left;width:100%;max-width:380px}
+.lw-card{
+  background:var(--bg2);border:1px solid var(--border2);border-radius:20px;
+  padding:28px;box-shadow:var(--shadow-lg);
+}
+.lw-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.lw-field label{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.8px}
+.lw-field input{
+  height:44px;padding:0 16px;background:var(--bg3);border:1px solid var(--border);
+  border-radius:var(--radius-sm);color:var(--text);font-size:14px;outline:none;
+  transition:border-color .25s,box-shadow .25s;font-weight:500;
+}
+.lw-field input:focus{border-color:var(--emerald);box-shadow:0 0 0 3px var(--emerald-glow)}
+.lw-field input::placeholder{color:var(--text4)}
+.lw-email-prev{font-size:11px;color:var(--emerald);margin-top:2px;font-weight:500}
+.lw-error{font-size:12px;color:#ef4444;text-align:center;margin-bottom:10px;min-height:18px;font-weight:500}
+.lw-btn{
+  width:100%;height:46px;
+  background:linear-gradient(135deg,var(--emerald),#0d9488);color:#fff;
+  border:none;border-radius:var(--radius-sm);font-size:15px;font-weight:600;cursor:pointer;
+  transition:all .25s var(--transition);margin-bottom:16px;letter-spacing:.2px;
+  box-shadow:0 4px 16px rgba(16,185,129,.2);
+}
+.lw-btn:hover{transform:translateY(-2px);box-shadow:0 6px 24px rgba(16,185,129,.35)}
+.lw-btn:disabled{opacity:.5;cursor:default;transform:none;box-shadow:none}
+.lw-switch{text-align:center;font-size:13px;color:var(--text3)}
+.lw-switch a{color:var(--emerald);cursor:pointer;text-decoration:none;font-weight:600}
+.lw-switch a:hover{text-decoration:underline}
+
+/* ============= RESPONSIVE ============= */
+@media(max-width:900px){
+  .reader{display:none}
+  .reader.show{display:flex;position:fixed;inset:0;z-index:30;background:var(--bg);animation:fadeIn .25s ease}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  .msg-list{flex:1}
+}
+@media(max-width:768px){
+  .mobile-header{display:flex}
+  .sidebar{
+    position:fixed;top:0;left:0;bottom:0;width:300px;transform:translateX(-100%);z-index:20;
+    box-shadow:20px 0 60px rgba(0,0,0,.5);
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sb-overlay.show{display:block}
+  .ml-header{padding:14px 16px}
+  .ml-search input{width:130px}
+  .msg-item{padding:14px 16px}
+  .compose-box{width:100%;border-radius:20px 20px 0 0}
+  .rd-header{padding:20px}
+  .rd-body{padding:20px}
+  .rd-actions{padding:14px 20px;flex-wrap:wrap}
+}
+@media(max-width:420px){
+  .ml-search input{width:80px}
+  .rd-actions .rd-btn span{display:none}
+  .login-wall h2{font-size:24px}
+}
+
+/* Scrollbar */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bg5);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--text4)}
+
+/* Focus visible */
+:focus-visible{outline:2px solid var(--emerald);outline-offset:2px}
+button:focus-visible{outline:2px solid var(--emerald);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<!-- ====== LOGIN WALL ====== -->
+<div class="login-wall" id="loginWall" style="display:none">
+  <div class="lw-icon">
+    <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/>
+    </svg>
+  </div>
+  <h2>TerranoWeb Mail</h2>
+  <p>Connectez-vous pour acceder a votre boite mail <strong>@terranoweb.win</strong></p>
+
+  <div class="lw-form">
+    <div class="lw-card">
+      <!-- LOGIN -->
+      <div id="lwLogin">
+        <div class="lw-field"><label>Identifiant</label><input type="text" id="lwUser" placeholder="Nom d'utilisateur" autocomplete="username"></div>
+        <div class="lw-field"><label>Mot de passe</label><input type="password" id="lwPass" placeholder="Votre mot de passe" autocomplete="current-password"></div>
+        <div class="lw-error" id="lwError"></div>
+        <button class="lw-btn" onclick="lwDoLogin()">Se connecter</button>
+        <div class="lw-switch">Pas de compte ? <a href="/register">Creer un compte</a></div>
+      </div>
+      <!-- REGISTER -->
+      <div id="lwRegister" style="display:none">
+        <div class="lw-field"><label>Nom d'utilisateur</label><input type="text" id="lwRegUser" placeholder="prenom.nom" oninput="lwPreview()" autocomplete="username"><div class="lw-email-prev" id="lwEmailPrev"></div></div>
+        <div class="lw-field"><label>Nom d'affichage</label><input type="text" id="lwRegName" placeholder="Votre nom complet"></div>
+        <div class="lw-field"><label>Mot de passe</label><input type="password" id="lwRegPass" placeholder="6 caracteres minimum" autocomplete="new-password"></div>
+        <div class="lw-error" id="lwRegError"></div>
+        <button class="lw-btn" onclick="lwDoRegister()">Creer le compte</button>
+        <div class="lw-switch">Deja inscrit ? <a onclick="lwToggle('login')">Se connecter</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ====== MAIN APP ====== -->
+<div class="app" id="mailApp" style="display:none">
+
+  <!-- Mobile header -->
+  <div class="mobile-header">
+    <button class="btn-hamburger" onclick="toggleSidebar()">
+      <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/></svg>
+    </button>
+    <div class="mob-title">Mail</div>
+    <button class="btn-compose" style="margin:0;padding:9px 16px;font-size:13px" onclick="openCompose()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931z"/></svg>
+    </button>
+  </div>
+
+  <!-- Sidebar overlay (mobile) -->
+  <div class="sb-overlay" id="sbOverlay" onclick="toggleSidebar()"></div>
+
+  <!-- Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sb-header">
+      <div class="sb-logo-icon">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+      </div>
+      <div class="sb-logo">
+        <div class="sb-logo-name">TerranoWeb</div>
+        <div class="sb-logo-sub">MESSAGERIE</div>
+      </div>
+    </div>
+
+    <button class="btn-compose" onclick="openCompose()">
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931z"/></svg>
+      Nouveau message
+    </button>
+
+    <div class="sb-divider"></div>
+
+    <div class="sb-folders">
+      <div class="sb-section">Messages</div>
+      <div class="sb-folder active" data-folder="inbox" onclick="switchFolder('inbox')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-17.5 0V6.75A2.25 2.25 0 014.5 4.5h15A2.25 2.25 0 0121.75 6.75v6.75m-19.5 0v4.5A2.25 2.25 0 004.5 19.5h15a2.25 2.25 0 002.25-2.25v-4.5"/></svg>
+        <span class="folder-name">Boite de reception</span>
+        <span class="badge" id="badgeInbox" style="display:none">0</span>
+      </div>
+      <div class="sb-folder" data-folder="sent" onclick="switchFolder('sent')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+        <span class="folder-name">Envoyes</span>
+      </div>
+      <div class="sb-folder" data-folder="drafts" onclick="switchFolder('drafts')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/></svg>
+        <span class="folder-name">Brouillons</span>
+      </div>
+
+      <div class="sb-divider"></div>
+      <div class="sb-section">Organiser</div>
+
+      <div class="sb-folder" data-folder="starred" onclick="switchFolder('starred')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+        <span class="folder-name">Favoris</span>
+      </div>
+      <div class="sb-folder" data-folder="trash" onclick="switchFolder('trash')">
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+        <span class="folder-name">Corbeille</span>
+      </div>
+    </div>
+
+    <div class="sb-user" id="sbUser"></div>
+  </div>
+
+  <!-- Message List -->
+  <div class="msg-list" id="msgList">
+    <div class="ml-header">
+      <div class="ml-header-left">
+        <div class="ml-title" id="mlTitle">Boite de reception</div>
+        <div class="ml-count" id="mlCount"></div>
+      </div>
+      <div class="ml-search">
+        <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" placeholder="Rechercher..." id="searchInput" oninput="debounceSearch()">
+      </div>
+    </div>
+    <div class="ml-body" id="mlBody"></div>
+    <div class="ml-pagination" id="mlPagination" style="display:none">
+      <button onclick="prevPage()" id="btnPrev" disabled>&#8592; Precedent</button>
+      <span id="pageInfo"></span>
+      <button onclick="nextPage()" id="btnNext" disabled>Suivant &#8594;</button>
+    </div>
+  </div>
+
+  <!-- Reader Pane -->
+  <div class="reader" id="reader">
+    <div class="rd-empty" id="rdEmpty">
+      <div class="rd-empty-inner">
+        <svg fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24"><path d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75"/></svg>
+        <p>Selectionnez un message</p>
+        <div class="rd-tip">Choisissez un email dans la liste pour le lire ici</div>
+      </div>
+    </div>
+    <div id="rdContent" style="display:none;flex-direction:column;flex:1"></div>
+  </div>
+</div>
+
+<!-- Compose Modal -->
+<div class="compose-overlay" id="composeOverlay">
+  <div class="compose-box">
+    <div class="cp-header">
+      <div class="cp-title" id="cpTitle">Nouveau message</div>
+      <button class="cp-close" onclick="closeCompose()">&times;</button>
+    </div>
+    <div class="cp-fields">
+      <div class="cp-field">
+        <label>A</label>
+        <div class="cp-to-wrap">
+          <input type="text" id="cpTo" placeholder="Destinataire" autocomplete="off" oninput="searchContacts()">
+          <div class="cp-autocomplete" id="cpAutocomplete" style="display:none"></div>
+        </div>
+      </div>
+      <div class="cp-hint">Utilisateur TerranoWeb ou email externe (Gmail, Outlook...)</div>
+      <div class="cp-field">
+        <label>Objet</label>
+        <input type="text" id="cpSubject" placeholder="Objet du message">
+      </div>
+    </div>
+    <div class="cp-body">
+      <textarea id="cpBody" placeholder="Ecrivez votre message..."></textarea>
+    </div>
+    <input type="file" id="cpFileInput" multiple hidden>
+    <div class="cp-attachments" id="cpAttachments"></div>
+    <div class="cp-footer">
+      <button class="cp-send" id="cpSendBtn" onclick="sendMessage(false)">
+        <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+        Envoyer
+      </button>
+      <button class="cp-draft" onclick="sendMessage(true)">Brouillon</button>
+      <button class="cp-attach-btn" onclick="addAttachments()" title="Joindre des fichiers">
+        <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div style="flex:1"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ==================== STATE ====================
+let currentUser = null
+let currentFolder = 'inbox'
+let currentPage = 1
+let totalPages = 1
+let currentMessageId = null
+let searchTimer = null
+let replyTo = null
+let unreadPolling = null
+let composeAttachments = []
+
+// ==================== INIT ====================
+async function init() {
+  try {
+    const r = await fetch('/api/auth/me', { credentials: 'include' })
+    const d = await r.json()
+    if (!d.ok || !d.user) {
+      document.getElementById('loginWall').style.display = 'flex'
+      return
+    }
+    currentUser = d.user
+    document.getElementById('mailApp').style.display = 'flex'
+    renderSidebarUser()
+    loadMessages()
+    loadUnread()
+    unreadPolling = setInterval(loadUnread, 60000)
+  } catch (e) {
+    document.getElementById('loginWall').style.display = 'flex'
+  }
+}
+
+function renderSidebarUser() {
+  const el = document.getElementById('sbUser')
+  const initial = (currentUser.displayName || currentUser.username)[0].toUpperCase()
+  el.innerHTML = `
+    <div class="sb-avatar">${initial}</div>
+    <div class="sb-user-info">
+      <div class="sb-user-name">${esc(currentUser.displayName || currentUser.username)}</div>
+      <div class="sb-user-email">${esc(currentUser.email)}</div>
+    </div>
+    <button class="btn-logout" onclick="logout()" title="Deconnexion">
+      <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9"/></svg>
+    </button>
+  `
+}
+
+// ==================== FOLDERS ====================
+const folderNames = {
+  inbox: 'Boite de reception', sent: 'Envoyes', drafts: 'Brouillons',
+  starred: 'Favoris', trash: 'Corbeille'
+}
+
+function switchFolder(folder) {
+  currentFolder = folder
+  currentPage = 1
+  currentMessageId = null
+  document.getElementById('searchInput').value = ''
+
+  document.querySelectorAll('.sb-folder').forEach(f => {
+    f.classList.toggle('active', f.dataset.folder === folder)
+  })
+  document.getElementById('mlTitle').textContent = folderNames[folder] || folder
+
+  hideReader()
+  loadMessages()
+  closeSidebar()
+}
+
+// ==================== LOAD MESSAGES ====================
+async function loadMessages() {
+  const body = document.getElementById('mlBody')
+  body.innerHTML = '<div style="padding:20px;display:flex;flex-direction:column;gap:4px">' +
+    Array(6).fill(0).map(() =>
+      '<div style="display:flex;gap:14px;padding:16px 4px;border-bottom:1px solid var(--border)">' +
+        '<div class="skeleton" style="width:42px;height:42px;border-radius:10px;flex-shrink:0"></div>' +
+        '<div style="flex:1;display:flex;flex-direction:column;gap:8px">' +
+          '<div style="display:flex;gap:8px"><div class="skeleton" style="height:14px;width:40%"></div><div style="flex:1"></div><div class="skeleton" style="height:12px;width:50px"></div></div>' +
+          '<div class="skeleton" style="height:13px;width:70%"></div>' +
+          '<div class="skeleton" style="height:12px;width:85%"></div>' +
+        '</div></div>'
+    ).join('') + '</div>'
+
+  const search = document.getElementById('searchInput').value.trim()
+  let url = `/api/mail/inbox?folder=${currentFolder}&page=${currentPage}&limit=20`
+  if (search) url += `&search=${encodeURIComponent(search)}`
+
+  try {
+    const r = await fetch(url, { credentials: 'include' })
+    const d = await r.json()
+    if (!d.ok) { body.innerHTML = '<div class="ml-empty"><p>Erreur de chargement</p></div>'; return }
+
+    totalPages = d.pages
+    document.getElementById('mlCount').textContent = `${d.total} message${d.total !== 1 ? 's' : ''}`
+
+    if (d.messages.length === 0) {
+      const emptyIcons = {
+        inbox: '<path d="M2.25 13.5h3.86a2.25 2.25 0 012.012 1.244l.256.512a2.25 2.25 0 002.013 1.244h3.218a2.25 2.25 0 002.013-1.244l.256-.512a2.25 2.25 0 012.013-1.244h3.859m-17.5 0V6.75A2.25 2.25 0 014.5 4.5h15A2.25 2.25 0 0121.75 6.75v6.75m-19.5 0v4.5A2.25 2.25 0 004.5 19.5h15a2.25 2.25 0 002.25-2.25v-4.5"/>',
+        sent: '<path d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/>',
+        drafts: '<path d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z"/>',
+        starred: '<path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/>',
+        trash: '<path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>'
+      }
+      const emptyTexts = {
+        inbox: 'Votre boite de reception est vide',
+        sent: 'Aucun message envoye',
+        drafts: 'Aucun brouillon',
+        starred: 'Aucun favori',
+        trash: 'La corbeille est vide'
+      }
+      body.innerHTML = `<div class="ml-empty">
+        <svg fill="none" stroke="currentColor" stroke-width="1" viewBox="0 0 24 24">${emptyIcons[currentFolder] || emptyIcons.inbox}</svg>
+        <p>${emptyTexts[currentFolder] || 'Aucun message'}</p></div>`
+      updatePagination()
+      return
+    }
+
+    body.innerHTML = d.messages.map(m => {
+      const isSentView = currentFolder === 'sent' || currentFolder === 'drafts'
+      const person = isSentView ? m.to : m.from
+      const isExt = person.isExternal
+      const initial = isExt ? '&#9993;' : (person.displayName || person.username)[0].toUpperCase()
+      const unread = !m.isRead && !isSentView
+      const name = person.displayName || person.username
+
+      let tags = ''
+      if (isExt) tags += '<span class="mi-tag external">Externe</span>'
+      if (m.hasAttachment) tags += '<span class="mi-tag attachment">Fichier</span>'
+
+      return `
+        <div class="msg-item ${unread ? 'unread' : ''} ${m.id === currentMessageId ? 'active' : ''}"
+             onclick="openMessage('${encodeAttr(m.id)}')" data-id="${encodeAttr(m.id)}">
+          <div class="mi-avatar" ${isExt ? 'style="font-size:18px"' : ''}>${initial}</div>
+          <div class="mi-content">
+            <div class="mi-top">
+              <div class="mi-from">${esc(name)}</div>
+              <div class="mi-date">${formatDate(m.createdAt)}</div>
+            </div>
+            <div class="mi-subject">${esc(m.subject || '(sans objet)')}</div>
+            <div class="mi-preview">${esc(m.preview)}</div>
+            <div class="mi-bottom">
+              ${tags}
+              <div style="flex:1"></div>
+              <div class="mi-star ${m.isStarred ? 'starred' : ''}" onclick="event.stopPropagation();toggleStar('${encodeAttr(m.id)}',${m.isStarred})">
+                <svg fill="${m.isStarred ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+      `
+    }).join('')
+
+    updatePagination()
+  } catch (e) {
+    body.innerHTML = '<div class="ml-empty"><p>Erreur de connexion</p></div>'
+  }
+}
+
+function updatePagination() {
+  const pag = document.getElementById('mlPagination')
+  if (totalPages <= 1) { pag.style.display = 'none'; return }
+  pag.style.display = 'flex'
+  document.getElementById('btnPrev').disabled = currentPage <= 1
+  document.getElementById('btnNext').disabled = currentPage >= totalPages
+  document.getElementById('pageInfo').textContent = `${currentPage} / ${totalPages}`
+}
+
+function prevPage() { if (currentPage > 1) { currentPage--; loadMessages() } }
+function nextPage() { if (currentPage < totalPages) { currentPage++; loadMessages() } }
+
+// ==================== OPEN MESSAGE ====================
+async function openMessage(id) {
+  currentMessageId = id
+
+  document.querySelectorAll('.msg-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.id === id)
+    if (el.dataset.id === id) el.classList.remove('unread')
+  })
+
+  const reader = document.getElementById('reader')
+  const content = document.getElementById('rdContent')
+  const empty = document.getElementById('rdEmpty')
+
+  empty.style.display = 'none'
+  content.style.display = 'flex'
+  reader.classList.add('show')
+
+  content.innerHTML = '<div style="padding:40px;display:flex;flex-direction:column;gap:16px;align-items:center">' +
+    '<div class="skeleton" style="height:28px;width:50%;border-radius:8px"></div>' +
+    '<div style="display:flex;gap:14px;width:100%;align-items:center;padding:12px 0">' +
+      '<div class="skeleton" style="width:44px;height:44px;border-radius:10px;flex-shrink:0"></div>' +
+      '<div style="flex:1;display:flex;flex-direction:column;gap:6px">' +
+        '<div class="skeleton" style="height:15px;width:35%"></div>' +
+        '<div class="skeleton" style="height:12px;width:55%"></div>' +
+      '</div></div>' +
+    '<div class="skeleton" style="height:200px;width:100%;border-radius:10px"></div></div>'
+
+  try {
+    const r = await fetch(`/api/mail/message/${id}`, { credentials: 'include' })
+    const d = await r.json()
+    if (!d.ok) { content.innerHTML = '<div class="rd-empty"><div class="rd-empty-inner"><p>Message introuvable</p></div></div>'; return }
+
+    const m = d.message
+    const initial = (m.from.displayName || m.from.username)[0].toUpperCase()
+
+    let attachHtml = ''
+    if (m.attachments && m.attachments.length > 0) {
+      attachHtml = `
+        <div class="rd-attachments">
+          <h4>
+            <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M18.375 12.739l-7.693 7.693a4.5 4.5 0 01-6.364-6.364l10.94-10.94A3 3 0 1119.5 7.372L8.552 18.32m.009-.01l-.01.01m5.699-9.941l-7.81 7.81a1.5 1.5 0 002.112 2.13"/></svg>
+            Pieces jointes (${m.attachments.length})
+          </h4>
+          <div class="rd-att-list">
+            ${m.attachments.map(a => `
+              <div class="rd-att-item" onclick="window.open('/api/mail/attachment/${a.id}','_blank')">
+                <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/></svg>
+                ${esc(a.filename)} <span class="rd-att-size">(${formatSize(a.size_bytes)})</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `
+    }
+
+    const toDisplay = m.to.isExternal
+      ? esc(m.to.email)
+      : `${esc(m.to.displayName || m.to.username)} &lt;${esc(m.to.email)}&gt;`
+
+    content.innerHTML = `
+      <div class="rd-header">
+        <div class="rd-subject">${esc(m.subject || '(sans objet)')}</div>
+        <div class="rd-meta">
+          <div class="rd-avatar">${initial}</div>
+          <div class="rd-from-info">
+            <div class="rd-from">${esc(m.from.displayName || m.from.username)}</div>
+            <div class="rd-email">a ${toDisplay}</div>
+          </div>
+          <div class="rd-date">${formatDateFull(m.createdAt)}</div>
+        </div>
+      </div>
+      <div class="rd-body">${esc(m.body)}</div>
+      ${attachHtml}
+      <div class="rd-actions">
+        <button class="rd-btn primary" onclick="reply('${encodeAttr(m.id)}','${esc(m.from.username)}','${esc(m.subject)}')">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"/></svg>
+          <span>Repondre</span>
+        </button>
+        <button class="rd-btn" onclick="toggleStar('${encodeAttr(m.id)}', ${m.isStarred})">
+          <svg fill="${m.isStarred ? 'var(--yellow)' : 'none'}" stroke="${m.isStarred ? 'var(--yellow)' : 'currentColor'}" stroke-width="1.5" viewBox="0 0 24 24"><path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+          <span>${m.isStarred ? 'Retirer' : 'Favori'}</span>
+        </button>
+        <button class="rd-btn danger" onclick="deleteMessage('${encodeAttr(m.id)}')">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+          <span>Supprimer</span>
+        </button>
+        <div style="flex:1"></div>
+        <button class="rd-btn" onclick="hideReader()" style="display:none" id="btnBackMobile">
+          <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
+          <span>Retour</span>
+        </button>
+      </div>
+    `
+
+    if (window.innerWidth <= 900) {
+      document.getElementById('btnBackMobile').style.display = 'flex'
+    }
+    loadUnread()
+  } catch (e) {
+    content.innerHTML = '<div class="rd-empty"><div class="rd-empty-inner"><p>Erreur de chargement</p></div></div>'
+  }
+}
+
+function hideReader() {
+  const reader = document.getElementById('reader')
+  reader.classList.remove('show')
+  document.getElementById('rdEmpty').style.display = 'flex'
+  document.getElementById('rdContent').style.display = 'none'
+  currentMessageId = null
+  document.querySelectorAll('.msg-item').forEach(el => el.classList.remove('active'))
+}
+
+// ==================== ACTIONS ====================
+async function toggleStar(id, current) {
+  await fetch(`/api/mail/message/${id}`, {
+    method: 'PUT', credentials: 'include',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ isStarred: !current })
+  })
+  if (currentMessageId === id) openMessage(id)
+  loadMessages()
+}
+
+async function deleteMessage(id) {
+  const isPermanent = currentFolder === 'trash'
+  const msg = isPermanent ? 'Supprimer definitivement ce message ?' : 'Deplacer vers la corbeille ?'
+  if (!confirm(msg)) return
+
+  const url = `/api/mail/message/${id}${isPermanent ? '?permanent=true' : ''}`
+  await fetch(url, { method: 'DELETE', credentials: 'include' })
+  toast(isPermanent ? 'Message supprime definitivement' : 'Deplace vers la corbeille', 'success')
+  hideReader()
+  loadMessages()
+  loadUnread()
+}
+
+// ==================== COMPOSE ====================
+function openCompose(toUser, subject, parentId) {
+  replyTo = parentId || null
+  document.getElementById('cpTo').value = toUser || ''
+  document.getElementById('cpSubject').value = subject || ''
+  document.getElementById('cpBody').value = ''
+  document.getElementById('cpTitle').textContent = parentId ? 'Repondre' : 'Nouveau message'
+  document.getElementById('cpAutocomplete').style.display = 'none'
+  document.getElementById('composeOverlay').classList.add('show')
+  closeSidebar()
+
+  if (!toUser) {
+    setTimeout(() => document.getElementById('cpTo').focus(), 350)
+  } else {
+    setTimeout(() => document.getElementById('cpBody').focus(), 350)
+  }
+}
+
+function closeCompose() {
+  document.getElementById('composeOverlay').classList.remove('show')
+  replyTo = null
+  composeAttachments = []
+  document.getElementById('cpAttachments').innerHTML = ''
+  document.getElementById('cpFileInput').value = ''
+}
+
+function reply(parentId, fromUsername, subject) {
+  const re = subject.startsWith('Re:') ? subject : 'Re: ' + subject
+  openCompose(fromUsername, re, parentId)
+}
+
+async function sendMessage(isDraft) {
+  let to = document.getElementById('cpTo').value.trim()
+  const subject = document.getElementById('cpSubject').value.trim()
+  const body = document.getElementById('cpBody').value.trim()
+
+  if (!to) { toast('Destinataire requis', 'error'); return }
+  // Validation format : username seul (interne) ou email valide (externe)
+  const emailRx = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  const usernameRx = /^[a-zA-Z0-9._-]{2,50}$/
+  if (!emailRx.test(to) && !usernameRx.test(to)) {
+    toast('Adresse invalide : entrez un email ou un nom d\'utilisateur', 'error'); return
+  }
+  if (!body && !isDraft) { toast('Le message ne peut pas etre vide', 'error'); return }
+
+  const btn = document.getElementById('cpSendBtn')
+  btn.disabled = true
+
+  try {
+    // Convert attachments to base64
+    const attachments = []
+    for (const att of composeAttachments) {
+      const base64 = await fileToBase64(att.file)
+      attachments.push({ filename: att.name, data: base64, mimeType: att.type || 'application/octet-stream' })
+    }
+
+    const r = await fetch('/api/mail/send', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ to, subject, body, isDraft, parentId: replyTo, attachments })
+    })
+    const d = await r.json()
+    if (!d.ok) { toast(d.error || 'Erreur d\'envoi', 'error'); btn.disabled = false; return }
+
+    toast(isDraft ? 'Brouillon sauvegarde' : 'Message envoye avec succes', 'success')
+    closeCompose()
+    loadMessages()
+  } catch (e) {
+    toast('Erreur de connexion au serveur', 'error')
+  }
+  btn.disabled = false
+}
+
+// ==================== ATTACHMENTS ====================
+const MAX_FILE_SIZE = 10 * 1024 * 1024  // 10 Mo
+const MAX_TOTAL_SIZE = 25 * 1024 * 1024 // 25 Mo
+
+function addAttachments() {
+  document.getElementById('cpFileInput').click()
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('cpFileInput').addEventListener('change', function() {
+    const files = Array.from(this.files)
+    if (!files.length) return
+
+    let currentTotal = composeAttachments.reduce((s, a) => s + a.size, 0)
+
+    for (const file of files) {
+      if (file.size > MAX_FILE_SIZE) {
+        toast(`"${file.name}" depasse 10 Mo`, 'error')
+        continue
+      }
+      if (currentTotal + file.size > MAX_TOTAL_SIZE) {
+        toast('Limite totale de 25 Mo atteinte', 'error')
+        break
+      }
+      // Avoid duplicates
+      if (composeAttachments.some(a => a.name === file.name && a.size === file.size)) continue
+      composeAttachments.push({ file, name: file.name, size: file.size, type: file.type })
+      currentTotal += file.size
+    }
+    this.value = ''
+    renderAttachments()
+  })
+})
+
+function renderAttachments() {
+  const container = document.getElementById('cpAttachments')
+  if (!composeAttachments.length) { container.innerHTML = ''; return }
+
+  const totalSize = composeAttachments.reduce((s, a) => s + a.size, 0)
+  container.innerHTML = composeAttachments.map((a, i) => `
+    <div class="cp-att-item">
+      <div class="cp-att-icon ${getFileIconClass(a.name)}">${getFileIconLabel(a.name)}</div>
+      <span class="cp-att-name" title="${esc(a.name)}">${esc(a.name)}</span>
+      <span class="cp-att-size">${formatSize(a.size)}</span>
+      <button class="cp-att-remove" onclick="removeAttachment(${i})" title="Retirer">&times;</button>
+    </div>
+  `).join('') + `<div class="cp-att-total">${composeAttachments.length} fichier${composeAttachments.length > 1 ? 's' : ''} - ${formatSize(totalSize)}</div>`
+}
+
+function removeAttachment(index) {
+  composeAttachments.splice(index, 1)
+  renderAttachments()
+}
+
+function getFileIconClass(name) {
+  const ext = name.split('.').pop().toLowerCase()
+  if (['jpg','jpeg','png','gif','webp','svg','bmp','ico'].includes(ext)) return 'img'
+  if (ext === 'pdf') return 'pdf'
+  if (['doc','docx','odt','rtf','txt','xls','xlsx','ppt','pptx','csv'].includes(ext)) return 'doc'
+  if (['zip','rar','7z','tar','gz','bz2'].includes(ext)) return 'zip'
+  return 'other'
+}
+
+function getFileIconLabel(name) {
+  const ext = name.split('.').pop().toLowerCase()
+  if (['jpg','jpeg','png','gif','webp','svg','bmp','ico'].includes(ext)) return 'IMG'
+  if (ext === 'pdf') return 'PDF'
+  if (['doc','docx'].includes(ext)) return 'DOC'
+  if (['xls','xlsx','csv'].includes(ext)) return 'XLS'
+  if (['ppt','pptx'].includes(ext)) return 'PPT'
+  if (['zip','rar','7z','tar','gz','bz2'].includes(ext)) return 'ZIP'
+  if (ext === 'txt' || ext === 'rtf') return 'TXT'
+  return ext.substring(0, 3).toUpperCase()
+}
+
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload = () => resolve(reader.result.split(',')[1])
+    reader.onerror = reject
+    reader.readAsDataURL(file)
+  })
+}
+
+// ==================== AUTOCOMPLETE ====================
+let acTimer = null
+function searchContacts() {
+  clearTimeout(acTimer)
+  acTimer = setTimeout(async () => {
+    const q = document.getElementById('cpTo').value.trim()
+    const ac = document.getElementById('cpAutocomplete')
+    if (q.length < 2) { ac.style.display = 'none'; return }
+
+    try {
+      const r = await fetch(`/api/mail/contacts?q=${encodeURIComponent(q)}`, { credentials: 'include' })
+      const d = await r.json()
+      if (!d.ok || d.contacts.length === 0) { ac.style.display = 'none'; return }
+
+      ac.innerHTML = d.contacts.map(c => {
+        const init = (c.displayName || c.username)[0].toUpperCase()
+        return `
+          <div class="cp-ac-item" onclick="selectContact('${esc(c.username)}')">
+            <div class="cp-ac-avatar">${init}</div>
+            <div class="cp-ac-info">
+              <div class="cp-ac-name">${esc(c.displayName || c.username)}</div>
+              <div class="cp-ac-email">${esc(c.email)}</div>
+            </div>
+          </div>
+        `
+      }).join('')
+      ac.style.display = 'block'
+    } catch (e) {
+      ac.style.display = 'none'
+    }
+  }, 250)
+}
+
+function selectContact(username) {
+  document.getElementById('cpTo').value = username
+  document.getElementById('cpAutocomplete').style.display = 'none'
+  document.getElementById('cpSubject').focus()
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.cp-to-wrap')) {
+    document.getElementById('cpAutocomplete').style.display = 'none'
+  }
+})
+
+// ==================== UNREAD COUNT ====================
+async function loadUnread() {
+  try {
+    const r = await fetch('/api/mail/unread', { credentials: 'include' })
+    const d = await r.json()
+    if (!d.ok) return
+    const badge = document.getElementById('badgeInbox')
+    if (d.count > 0) {
+      badge.textContent = d.count > 99 ? '99+' : d.count
+      badge.style.display = 'inline-block'
+    } else {
+      badge.style.display = 'none'
+    }
+  } catch (e) { console.error('[Mail] Erreur chargement badges:', e) }
+}
+
+// ==================== SEARCH ====================
+function debounceSearch() {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => { currentPage = 1; loadMessages() }, 400)
+}
+
+// ==================== SIDEBAR MOBILE ====================
+function toggleSidebar() {
+  const sb = document.getElementById('sidebar')
+  const ov = document.getElementById('sbOverlay')
+  sb.classList.toggle('open')
+  ov.classList.toggle('show')
+}
+
+function closeSidebar() {
+  document.getElementById('sidebar').classList.remove('open')
+  document.getElementById('sbOverlay').classList.remove('show')
+}
+
+// ==================== LOGOUT ====================
+async function logout() {
+  await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' })
+  clearInterval(unreadPolling)
+  window.location.href = '/'
+}
+
+// ==================== UTILS ====================
+function esc(s) {
+  if (!s) return ''
+  const d = document.createElement('div')
+  d.textContent = s
+  return d.innerHTML
+}
+
+// Sanitize IDs for use in onclick attributes (prevent XSS via crafted message IDs)
+function encodeAttr(s) {
+  if (!s) return ''
+  return s.replace(/[^a-zA-Z0-9\-]/g, '')
+}
+
+function formatDate(ts) {
+  const d = new Date(ts)
+  const now = new Date()
+  const diff = now - d
+  if (diff < 60000) return 'A l\'instant'
+  if (diff < 3600000) return Math.floor(diff / 60000) + ' min'
+  if (diff < 86400000 && d.getDate() === now.getDate()) {
+    return d.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
+  }
+  if (diff < 604800000) {
+    return d.toLocaleDateString('fr-FR', { weekday: 'short' })
+  }
+  return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+}
+
+function formatDateFull(ts) {
+  return new Date(ts).toLocaleDateString('fr-FR', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  })
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' o'
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' Ko'
+  return (bytes / 1048576).toFixed(1) + ' Mo'
+}
+
+function toast(msg, type) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = 'toast ' + (type || '') + ' show'
+  setTimeout(() => t.classList.remove('show'), 3500)
+}
+
+// ==================== LOGIN WALL ====================
+function lwToggle(mode) {
+  document.getElementById('lwLogin').style.display = mode === 'login' ? 'block' : 'none'
+  document.getElementById('lwRegister').style.display = mode === 'register' ? 'block' : 'none'
+  document.getElementById('lwError').textContent = ''
+  document.getElementById('lwRegError').textContent = ''
+}
+
+function lwPreview() {
+  const u = document.getElementById('lwRegUser').value.trim().toLowerCase()
+  document.getElementById('lwEmailPrev').textContent = u ? u + '@terranoweb.win' : ''
+}
+
+async function lwDoLogin() {
+  const user = document.getElementById('lwUser').value.trim()
+  const pass = document.getElementById('lwPass').value
+  const err = document.getElementById('lwError')
+  err.textContent = ''
+  if (!user || !pass) { err.textContent = 'Remplissez tous les champs'; return }
+
+  try {
+    const r = await fetch('/api/auth/login', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass })
+    })
+    const d = await r.json()
+    if (!d.ok) { err.textContent = d.error || 'Identifiants incorrects'; return }
+    document.getElementById('loginWall').style.display = 'none'
+    currentUser = d.user
+    document.getElementById('mailApp').style.display = 'flex'
+    renderSidebarUser()
+    loadMessages()
+    loadUnread()
+    unreadPolling = setInterval(loadUnread, 60000)
+  } catch (e) {
+    err.textContent = 'Erreur de connexion'
+  }
+}
+
+async function lwDoRegister() {
+  const user = document.getElementById('lwRegUser').value.trim()
+  const name = document.getElementById('lwRegName').value.trim()
+  const pass = document.getElementById('lwRegPass').value
+  const err = document.getElementById('lwRegError')
+  err.textContent = ''
+  if (!user || !pass) { err.textContent = 'Remplissez tous les champs obligatoires'; return }
+  if (pass.length < 6) { err.textContent = 'Mot de passe : 6 caracteres minimum'; return }
+
+  try {
+    const r = await fetch('/api/auth/register', {
+      method: 'POST', credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: user, password: pass, displayName: name || user })
+    })
+    const d = await r.json()
+    if (!d.ok) { err.textContent = d.error || 'Erreur lors de la creation du compte'; return }
+    document.getElementById('loginWall').style.display = 'none'
+    currentUser = d.user
+    document.getElementById('mailApp').style.display = 'flex'
+    renderSidebarUser()
+    loadMessages()
+    loadUnread()
+    unreadPolling = setInterval(loadUnread, 60000)
+  } catch (e) {
+    err.textContent = 'Erreur de connexion'
+  }
+}
+
+// Enter key support
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return
+  const t = e.target
+  if (t.id === 'lwUser' || t.id === 'lwPass') { e.preventDefault(); lwDoLogin() }
+  if (t.id === 'lwRegUser' || t.id === 'lwRegName' || t.id === 'lwRegPass') { e.preventDefault(); lwDoRegister() }
+})
+
+// Escape key for modals
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    if (document.getElementById('composeOverlay').classList.contains('show')) closeCompose()
+  }
+})
+
+// ==================== START ====================
+init()
+</script>
+</body>
+</html>

@@ -1,0 +1,26 @@
+node_modules/
+out/
+dist/
+build/
+*.log
+.DS_Store
+Thumbs.db
+
+# Secrets & database
+website/secrets.json
+website/portal.db
+website/portal.db-shm
+website/portal.db-wal
+
+# Large binaries (use GitHub Releases instead)
+website/downloads/*.exe
+website/downloads/*.exe.blockmap
+website/downloads/*.apk
+website/downloads/*.apk.idsig
+
+# Temp
+website/check-syntax.js
+website/nul
+
+# Gradle build cache
+android-app/.gradle/

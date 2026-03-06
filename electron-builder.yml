@@ -1,0 +1,56 @@
+appId: com.terrano.terranoweb
+productName: TerranoWeb
+copyright: Copyright © 2026 TerranoWeb
+
+directories:
+  buildResources: build
+  output: dist
+
+files:
+  - "!**/.vscode/*"
+  - "!src/*"
+  - "!website/*"
+  - "!website/**/*"
+  - "!scripts/*"
+  - "!build/*"
+  - "!dist/*"
+  - "!electron.vite.config.{js,ts,mjs,cjs}"
+  - "!{.eslintignore,.eslintrc*,.prettierrc,tsconfig*}"
+  - "!{.env,.env.*,.npmrc,pnpm-lock.yaml}"
+  - "!{README.md,LICENSE}"
+
+afterPack: ./scripts/afterPack.js
+
+asarUnpack:
+  - "**/*.node"
+
+extraResources:
+  - from: resources/
+    to: .
+    filter:
+      - "**/*"
+
+win:
+  executableName: TerranoWeb
+  icon: build/icon.ico
+  signAndEditExecutable: false
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  artifactName: TerranoWeb-Setup-${version}.${ext}
+  shortcutName: TerranoWeb
+  uninstallDisplayName: TerranoWeb
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+
+npmRebuild: true
+
+publish:
+  - provider: generic
+    url: https://terranoweb.win/downloads
+    channel: latest

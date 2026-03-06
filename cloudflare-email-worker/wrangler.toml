@@ -1,0 +1,7 @@
+name = "terranoweb-email-worker"
+main = "src/index.js"
+compatibility_date = "2025-01-01"
+
+[vars]
+WEBHOOK_URL = "https://terranoweb.win/api/mail/incoming"
+WEBHOOK_SECRET = "tw_incoming_8f3a9c2d7e1b5046"

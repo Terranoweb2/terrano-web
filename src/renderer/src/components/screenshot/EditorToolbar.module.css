@@ -1,0 +1,175 @@
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: var(--color-surface, #1e293b);
+  border-bottom: 1px solid var(--color-border, #334155);
+  flex-shrink: 0;
+}
+
+.group {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.sep {
+  width: 1px;
+  height: 24px;
+  background: var(--color-border, #334155);
+  margin: 0 4px;
+}
+
+.toolBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.toolBtn:hover {
+  background: var(--color-hover, rgba(255, 255, 255, 0.08));
+  color: var(--color-text, #e2e8f0);
+}
+.toolBtn.active {
+  background: var(--emerald, #10b981);
+  color: #fff;
+}
+
+.toolLabel {
+  font-size: 11px;
+}
+
+.colors {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-left: 6px;
+}
+
+.colorDot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s;
+  padding: 0;
+}
+.colorDot:hover {
+  transform: scale(1.15);
+}
+.colorDot.activeColor {
+  border-color: #fff;
+  transform: scale(1.2);
+}
+
+.sizeControl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 8px;
+}
+
+.sizeLabel {
+  font-size: 11px;
+  color: var(--color-text-muted, #94a3b8);
+  min-width: 30px;
+  text-align: right;
+}
+
+.slider {
+  width: 80px;
+  height: 4px;
+  appearance: none;
+  background: var(--color-border, #334155);
+  border-radius: 2px;
+  outline: none;
+}
+.slider::-webkit-slider-thumb {
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--emerald, #10b981);
+  cursor: pointer;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.actionBtn:hover:not(:disabled) {
+  background: var(--color-hover, rgba(255, 255, 255, 0.08));
+  color: var(--color-text, #e2e8f0);
+}
+.actionBtn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.saveBtn,
+.copyBtn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.saveBtn {
+  background: var(--emerald, #10b981);
+  color: #fff;
+}
+.saveBtn:hover {
+  background: var(--emerald-dark, #059669);
+}
+.copyBtn {
+  background: var(--color-hover, rgba(255, 255, 255, 0.08));
+  color: var(--color-text, #e2e8f0);
+}
+.copyBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-muted, #94a3b8);
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.closeBtn:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #ef4444;
+}

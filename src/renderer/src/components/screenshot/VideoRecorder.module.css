@@ -1,0 +1,59 @@
+.indicator {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(15, 23, 42, 0.9);
+  border: 1px solid #ef4444;
+  border-radius: 8px;
+  z-index: 10003;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.dot {
+  color: #ef4444;
+  fill: #ef4444;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.time {
+  color: #fff;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+  font-family: monospace;
+}
+
+.stopBtn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 4px;
+  background: #ef4444;
+  color: #fff;
+  font-size: 11px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.stopBtn:hover {
+  background: #dc2626;
+}
+
+.spinner {
+  color: #94a3b8;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}

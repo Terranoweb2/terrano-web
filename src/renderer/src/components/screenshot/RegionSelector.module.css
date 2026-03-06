@@ -1,0 +1,70 @@
+.container {
+  position: fixed;
+  inset: 0;
+  cursor: crosshair;
+  user-select: none;
+  z-index: 10001;
+}
+
+.frozenImage {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.darkOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+.selection {
+  position: absolute;
+  border: 2px solid var(--emerald, #10b981);
+  overflow: hidden;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.45);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.selectionImage {
+  display: block;
+  pointer-events: none;
+  width: 100vw;
+  height: 100vh;
+}
+
+.hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 500;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+  pointer-events: none;
+  z-index: 2;
+}
+
+.cancelBtn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(239, 68, 68, 0.8);
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  z-index: 2;
+  transition: background 0.15s;
+}
+.cancelBtn:hover {
+  background: rgba(239, 68, 68, 1);
+}

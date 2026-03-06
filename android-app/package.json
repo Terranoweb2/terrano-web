@@ -1,0 +1,11 @@
+{
+  "name": "terranoweb-mobile",
+  "version": "1.0.0",
+  "description": "TerranoWeb Mobile Browser",
+  "scripts": {
+    "build": "npx cap sync android && cd android && ./gradlew assembleRelease"
+  },
+  "dependencies": {
+    "@nicepay-co/nicepay-capacitor-browserapp": "^0.0.0"
+  }
+}

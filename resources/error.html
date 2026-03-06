@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy"
+    content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;" />
+  <title>Erreur — TerranoWeb</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #0f172a;
+      --text-secondary: #64748b;
+      --text-muted: #94a3b8;
+      --emerald: #10b981;
+      --emerald-hover: #059669;
+      --border: #e2e8f0;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --text: #f1f5f9;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        --emerald: #34d399;
+        --emerald-hover: #10b981;
+        --border: #334155;
+      }
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 24px;
+      text-align: center;
+    }
+    .error-icon {
+      width: 72px;
+      height: 72px;
+      margin-bottom: 24px;
+      color: var(--text-muted);
+    }
+    h1 {
+      font-size: 22px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      margin-bottom: 8px;
+      max-width: 480px;
+      line-height: 1.5;
+    }
+    .error-code {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 24px;
+      font-family: monospace;
+    }
+    .retry-btn {
+      padding: 10px 24px;
+      border: none;
+      border-radius: 8px;
+      background: var(--emerald);
+      color: white;
+      font-size: 14px;
+      font-family: inherit;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .retry-btn:hover {
+      background: var(--emerald-hover);
+    }
+  </style>
+</head>
+<body>
+  <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="12" cy="12" r="10" />
+    <line x1="12" y1="8" x2="12" y2="12" />
+    <line x1="12" y1="16" x2="12.01" y2="16" />
+  </svg>
+  <h1 id="title">Impossible d'accéder à ce site</h1>
+  <p class="description" id="desc">La page Web n'est pas accessible. Vérifiez votre connexion Internet ou réessayez plus tard.</p>
+  <p class="error-code" id="errorCode"></p>
+  <button class="retry-btn" id="retryBtn" onclick="retry()">Réessayer</button>
+
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var code = params.get('code') || '';
+    var url = params.get('url') || '';
+    var desc = params.get('desc') || '';
+
+    var messages = {
+      '-2': { title: 'Réseau inaccessible', desc: 'Vérifiez votre connexion Internet.' },
+      '-3': { title: 'Ce site est inaccessible', desc: 'Le serveur DNS est introuvable. Vérifiez l\'adresse saisie.' },
+      '-6': { title: 'Ce site est inaccessible', desc: 'La connexion au serveur a été refusée.' },
+      '-7': { title: 'Ce site est inaccessible', desc: 'Le délai de connexion a expiré.' },
+      '-21': { title: 'Réseau modifié', desc: 'Un changement de réseau a été détecté. Rechargez la page.' },
+      '-100': { title: 'Connexion interrompue', desc: 'La connexion au serveur a été interrompue.' },
+      '-101': { title: 'Connexion réinitialisée', desc: 'La connexion a été réinitialisée par le serveur.' },
+      '-102': { title: 'Connexion refusée', desc: 'Le serveur a refusé la connexion.' },
+      '-104': { title: 'Connexion échouée', desc: 'Impossible d\'établir une connexion avec le serveur.' },
+      '-105': { title: 'Nom de domaine introuvable', desc: 'L\'adresse DNS du serveur est introuvable.' },
+      '-106': { title: 'Pas de connexion Internet', desc: 'Vérifiez votre connexion réseau.' },
+      '-118': { title: 'Délai dépassé', desc: 'Le serveur a mis trop de temps à répondre.' },
+      '-200': { title: 'Certificat invalide', desc: 'Le certificat de sécurité du site n\'est pas fiable.' },
+      '-201': { title: 'Certificat expiré', desc: 'Le certificat de sécurité du site a expiré.' },
+      '-202': { title: 'Certificat non reconnu', desc: 'L\'autorité de certification n\'est pas reconnue.' },
+    };
+
+    var info = messages[code];
+    if (info) {
+      document.getElementById('title').textContent = info.title;
+      document.getElementById('desc').textContent = info.desc;
+    } else if (desc) {
+      document.getElementById('desc').textContent = desc;
+    }
+
+    if (url) {
+      document.getElementById('errorCode').textContent = url + (code ? ' (ERR_CODE: ' + code + ')' : '');
+    }
+
+    function retry() {
+      if (url) {
+        window.location.href = url;
+      } else {
+        window.location.reload();
+      }
+    }
+  </script>
+</body>
+</html>
