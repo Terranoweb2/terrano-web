@@ -59,7 +59,7 @@ TerranoWeb V1 est un navigateur multi-onglets complet qui combine la puissance d
 
 ## Captures d'ecran
 
-*A venir.*
+![TerranoWeb - Page d'accueil](screenshot.png)
 
 ---
 
@@ -77,7 +77,7 @@ TerranoWeb V1 est un navigateur multi-onglets complet qui combine la puissance d
 
 ```bash
 # Cloner le depot
-git clone <url-du-depot>
+git clone https://github.com/Terranoweb2/terrano-web.git
 cd terrano-web
 
 # Installer les dependances
